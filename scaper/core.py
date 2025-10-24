@@ -1499,7 +1499,8 @@ class Scaper(object):
                            allowed_labels=[],
                            used_labels=[],
                            used_source_files=[],
-                           disable_instantiation_warnings=False):
+                           disable_instantiation_warnings=False,
+                           disable_event_looping=True):
         '''
         Instantiate an event specification.
 
@@ -1648,14 +1649,18 @@ class Scaper(object):
             # Check if chosen event duration is longer than the duration of the
             # selected source file, if so adjust the event duration.
             if (event_duration > source_duration):
-                old_duration = event_duration  # for warning
-                event_duration = source_duration
-                if not disable_instantiation_warnings:
-                    warnings.warn(
-                        "{:s} event duration ({:.2f}) is greater that source "
-                        "duration ({:.2f}), changing to {:.2f}".format(
-                            label, old_duration, source_duration, event_duration),
-                        ScaperWarning)
+                # event duration is longer than source: loop the source
+                if not disable_event_looping:
+                    print("Looping source file for event label {:s} and duration {:.2f} for {:.2f}".format(label, source_duration, event_duration))
+                else:
+                    old_duration = event_duration  # for warning
+                    event_duration = source_duration
+                    if not disable_instantiation_warnings:
+                        warnings.warn(
+                            "{:s} event duration ({:.2f}) is greater that source "
+                            "duration ({:.2f}), changing to {:.2f}".format(
+                                label, old_duration, source_duration, event_duration),
+                            ScaperWarning)
 
         # Get time stretch value
         if event.time_stretch is None:
@@ -1815,7 +1820,8 @@ class Scaper(object):
 
     def _instantiate(self, allow_repeated_label=True,
                      allow_repeated_source=True, reverb=None,
-                     disable_instantiation_warnings=False):
+                     disable_instantiation_warnings=False,
+                     disable_event_looping=True):
         '''
         Instantiate a specific soundscape in JAMS format based on the current
         specification.
@@ -1912,7 +1918,8 @@ class Scaper(object):
                 allowed_labels=bg_labels_available[library],
                 used_labels=bg_labels_used[library],
                 used_source_files=bg_files_used[library],
-                disable_instantiation_warnings=disable_instantiation_warnings)
+                disable_instantiation_warnings=disable_instantiation_warnings
+            )
 
             # Note: add_background doesn't allow to set a time_stretch, i.e.
             # it's hardcoded to time_stretch=None, so we don't need to check
@@ -1933,7 +1940,9 @@ class Scaper(object):
                 allowed_labels=fg_labels_available[library],
                 used_labels=fg_labels_available[library],
                 used_source_files=fg_files_used[library],
-                disable_instantiation_warnings=disable_instantiation_warnings)
+                disable_instantiation_warnings=disable_instantiation_warnings,
+                disable_event_looping=disable_event_looping
+                )
 
             if value.time_stretch is not None:
                 event_duration_stretched = (
@@ -2017,6 +2026,7 @@ class Scaper(object):
                         quick_pitch_time=False,
                         save_isolated_events=False,
                         isolated_events_path=None,
+                        disable_event_looping=True,
                         disable_sox_warnings=True,
                         save_isolated_positions=False,
                         isolated_positions_path=None):
@@ -2129,12 +2139,12 @@ class Scaper(object):
             duration_in_samples = int(self.duration * self.sr)
 
             for i, e in enumerate(ann.data):
+                # Concatenate if necessary.
+                source_duration = soundfile.info(e.value['source_file']).duration
+                ntiles = int(
+                    max(self.duration // source_duration + 1, 1))
+                
                 if e.value['role'] == 'background':
-                    # Concatenate background if necessary.
-                    source_duration = soundfile.info(e.value['source_file']).duration
-                    ntiles = int(
-                        max(self.duration // source_duration + 1, 1))
-
                     # Create transformer
                     tfm = sox.Transformer()
                     # Ensure consistent sampling rate and channels
@@ -2225,6 +2235,10 @@ class Scaper(object):
                         event_audio, event_sr = soundfile.read(
                             e.value['source_file'], always_2d=True,
                             start=start, stop=stop)
+                        # tile the event along the appropriate dimensions
+                        if not disable_event_looping:
+                            event_audio = np.tile(event_audio, (ntiles, 1))
+                            event_audio = event_audio[:stop]
                         event_audio = tfm.build_array(
                             input_array=event_audio,
                             sample_rate_in=event_sr
@@ -2392,7 +2406,8 @@ class Scaper(object):
                  txt_sep='\t',
                  disable_instantiation_warnings=False,
                  save_isolated_positions=False,
-                 isolated_positions_path=None):
+                 isolated_positions_path=None,
+                 disable_event_looping=True):
         """
         Generate a soundscape based on the current specification and return as
         an audio file, a JAMS annotation, a simplified annotation list, and a
@@ -2535,7 +2550,9 @@ class Scaper(object):
             allow_repeated_label=allow_repeated_label,
             allow_repeated_source=allow_repeated_source,
             reverb=reverb,
-            disable_instantiation_warnings=disable_instantiation_warnings)
+            disable_instantiation_warnings=disable_instantiation_warnings,
+            disable_event_looping=disable_event_looping
+            )
         ann = soundscape_jam.annotations.search(namespace='scaper')[0]
 
         soundscape_audio, event_audio_list = None, None
@@ -2554,7 +2571,8 @@ class Scaper(object):
                                      peak_normalization=peak_normalization,
                                      quick_pitch_time=quick_pitch_time,
                                      save_isolated_positions=save_isolated_positions,
-                                     isolated_positions_path=isolated_positions_path)
+                                     isolated_positions_path=isolated_positions_path,
+                                     disable_event_looping=disable_event_looping)
 
         # TODO: Stick to heavy handed overwriting for now, in the future we
         #  should consolidate this with what happens inside _instantiate().
@@ -2627,7 +2645,9 @@ class Scaper(object):
                     quick_pitch_time= quick_pitch_time,
                     save_isolated_events=False,
                     disable_sox_warnings=disable_sox_warnings,
-                    save_isolated_positions=False)
+                    save_isolated_positions=False,
+                    disable_event_looping=disable_event_looping
+                    )
                 
                 # Save the JAMS file for this event type
                 if jams_path is not None:
