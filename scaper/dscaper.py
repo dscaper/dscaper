@@ -376,7 +376,9 @@ class Dscaper:
             txt_path=txtfile,
             save_isolated_events=properties.save_isolated_events,
             save_isolated_positions=properties.save_isolated_positions,
-            disable_event_looping=False # allow event looping for generated timelines
+            disable_event_looping=False ,# allow event looping for generated timelines
+            disable_instantiation_warnings=True, # disable warnings for generated timelines
+            fix_clipping=True # fix clipping for generated timelines
         )
         # add the generated files in the properties (including subdirectories)
         properties.generated_files = []

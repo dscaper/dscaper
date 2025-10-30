@@ -1649,10 +1649,9 @@ class Scaper(object):
             # Check if chosen event duration is longer than the duration of the
             # selected source file, if so adjust the event duration.
             if (event_duration > source_duration):
-                # event duration is longer than source: loop the source
-                if not disable_event_looping:
-                    print("Looping source file for event label {:s} and duration {:.2f} for {:.2f}".format(label, source_duration, event_duration))
-                else:
+                # event duration is longer than source: loop the source (default)
+                # or display a warning when looping is disabled
+                if disable_event_looping:
                     old_duration = event_duration  # for warning
                     event_duration = source_duration
                     if not disable_instantiation_warnings:
