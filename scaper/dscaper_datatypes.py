@@ -59,6 +59,7 @@ class DscaperGenerate(BaseModel):
     id: Optional[str] = None # set by the server
     timestamp: int = 0 # set by the server
     generated_files: list[str] = []  # List of generated audio files, set by the server
+    disable_instantiation_warnings: bool = True # Whether to disable instantiation warnings during generation
 
 class DscaperGenerations(BaseModel):
     generations: list[DscaperGenerate] = []
