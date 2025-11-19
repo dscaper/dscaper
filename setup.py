@@ -15,7 +15,7 @@ with open('README.md') as file:
 
 
 setup(
-    name='scaper',
+    name='dscaper',
     version=version.version,
     description='A library for soundscape synthesis and augmentation',
     author='Justin Salamon, Duncan MacConnell, David Grünert',
