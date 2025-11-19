@@ -30,7 +30,6 @@ setup(
     classifiers=[
             "License :: OSI Approved :: BSD License",
             "Programming Language :: Python",
-            "Development Status :: 1 - Alpha",
             "Intended Audience :: Developers",
             "Intended Audience :: Science/Research",
             "Topic :: Multimedia :: Sound/Audio :: Analysis",
