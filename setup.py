@@ -20,7 +20,7 @@ setup(
     description='A library for soundscape synthesis and augmentation',
     author='Justin Salamon, Duncan MacConnell, David Grünert',
     author_email='justin.salamon@gmail.com',
-    url='github.com/dscaper/dscaper',
+    url='https://github.com/dscaper/dscaper',
     download_url='',
     packages=['dscaper'],
     long_description=long_description,
