@@ -1,4 +1,4 @@
-import scaper
+import dscaper
 import os
 
 path_to_audio = os.path.join('tests','data','audio')
@@ -7,7 +7,7 @@ soundscape_duration = 10.0
 seed = 123
 foreground_folder = os.path.join(path_to_audio, 'foreground')
 background_folder = os.path.join(path_to_audio, 'background')
-sc = scaper.Scaper(soundscape_duration, foreground_folder, background_folder)
+sc = dscaper.Scaper(soundscape_duration, foreground_folder, background_folder)
 sc.ref_db = -20
 
 sc.add_background(label=('const', 'park'),

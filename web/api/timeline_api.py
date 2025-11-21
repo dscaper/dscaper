@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from scaper.dscaper_datatypes import DscaperTimeline, DscaperBackground, DscaperEvent, DscaperGenerate
-from scaper import dscaper
+from dscaper.dscaper_datatypes import DscaperTimeline, DscaperBackground, DscaperEvent, DscaperGenerate
+from dscaper import dscaper
 from web.api.datatypes import TimelineCreateDTO, DscaperWebResponse
 
 

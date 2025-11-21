@@ -5,7 +5,7 @@ Scaper. It generates 100 soundscapes in sequence
 currently takes 158.68 seconds (02:38).
 """
 
-import scaper
+import dscaper
 import numpy as np
 import tempfile
 import os
@@ -95,7 +95,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
     seed = 123
 
     # create a scaper that will be used below
-    sc = scaper.Scaper(duration, fg_folder, bg_folder, random_state=seed)
+    sc = dscaper.Scaper(duration, fg_folder, bg_folder, random_state=seed)
     sc.protected_labels = []
     sc.ref_db = ref_db
 
@@ -149,7 +149,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
     row = {
         'command': cmd_line,
         'time_of_run': str(datetime.datetime.now()),
-        'scaper_version': scaper.__version__,
+        'scaper_version': dscaper.__version__,
         'python_version': platform.python_version(),
         'system': uname.system,
         'machine': uname.machine,

@@ -4,18 +4,18 @@
 Tests for functions in util.py
 '''
 
-from scaper.util import _close_temp_files
-from scaper.util import _set_temp_logging_level
-from scaper.util import _validate_folder_path
-from scaper.util import _get_sorted_files
-from scaper.util import _populate_label_list
-from scaper.util import _sample_trunc_norm, _sample_choose, _sample_choose_weighted
-from scaper.util import max_polyphony
-from scaper.util import polyphony_gini
-from scaper.util import is_real_number, is_real_array
-from scaper.util import _check_random_state
-from scaper.scaper_exceptions import ScaperError
-from scaper.scaper_warnings import ScaperWarning
+from dscaper.util import _close_temp_files
+from dscaper.util import _set_temp_logging_level
+from dscaper.util import _validate_folder_path
+from dscaper.util import _get_sorted_files
+from dscaper.util import _populate_label_list
+from dscaper.util import _sample_trunc_norm, _sample_choose, _sample_choose_weighted
+from dscaper.util import max_polyphony
+from dscaper.util import polyphony_gini
+from dscaper.util import is_real_number, is_real_array
+from dscaper.util import _check_random_state
+from dscaper.scaper_exceptions import ScaperError
+from dscaper.scaper_warnings import ScaperWarning
 import tempfile
 import os
 import logging
@@ -24,8 +24,8 @@ import shutil
 import numpy as np
 from scipy.stats import truncnorm
 import jams
-from scaper.core import EventSpec
-from scaper import Scaper
+from dscaper.core import EventSpec
+from dscaper import Scaper
 
 
 # FIXTURES

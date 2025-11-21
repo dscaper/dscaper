@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Union
 from fastapi import Response
 import json
-from scaper.dscaper_datatypes import DscaperJsonResponse, DscaperApiResponse
+from dscaper.dscaper_datatypes import DscaperJsonResponse, DscaperApiResponse
 
 
 class TimelineCreateDTO(BaseModel):

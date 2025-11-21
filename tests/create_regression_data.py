@@ -1,5 +1,5 @@
 import os
-import scaper
+import dscaper
 import jams
 
 os.chdir('..')
@@ -55,7 +55,7 @@ for rate in SAMPLE_RATES:
         print()
     print("==========USING ABOVE FOR TESTS==============")
 
-    sc = scaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
+    sc = dscaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
     sc.ref_db = -50
     sc.sr = rate
 
@@ -116,7 +116,7 @@ for rate in SAMPLE_RATES:
     jams.load(jam_file)
 
     # soundscape with only one event will use transformer (regression test)
-    sc = scaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
+    sc = dscaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
     sc.ref_db = -20
     sc.sr = rate
 

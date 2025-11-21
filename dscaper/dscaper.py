@@ -3,11 +3,11 @@ import os
 import time
 import uuid
 import json
-import scaper
+import dscaper
 import zipfile
 import soundfile
 from fastapi import File, status
-from scaper.dscaper_datatypes import *
+from dscaper.dscaper_datatypes import *
 from typing import Annotated, Optional, Union
 
 
@@ -309,7 +309,7 @@ class Dscaper:
         os.makedirs(bg_path, exist_ok=True)
 
         # Use scaper to generate the timeline
-        sc = scaper.Scaper(
+        sc = dscaper.Scaper(
             duration=timeline.duration,
             fg_path=fg_path,  # fg_path is not used in this context
             bg_path=bg_path,  # bg_path is not used in this context
