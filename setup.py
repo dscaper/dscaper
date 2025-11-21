@@ -43,7 +43,6 @@ setup(
         'fastapi',
         'jams',
         'pyloudnorm',
-        'backports.tempfile',
     ],
     extras_require={
         'docs': [
