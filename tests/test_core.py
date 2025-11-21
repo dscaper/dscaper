@@ -1,10 +1,10 @@
 
-import scaper
-from scaper.scaper_exceptions import ScaperError
-from scaper.scaper_warnings import ScaperWarning
-from scaper.util import _close_temp_files
+import dscaper
+from dscaper.scaper_exceptions import ScaperError
+from dscaper.scaper_warnings import ScaperWarning
+from dscaper.util import _close_temp_files
 import pytest
-from scaper.core import EventSpec
+from dscaper.core import EventSpec
 import tempfile
 import backports.tempfile
 import os
@@ -214,7 +214,7 @@ def test_generate_from_jams(atol=1e-5, rtol=1e-8):
 
         jam.save(jam_file.name)
 
-        pytest.raises(ScaperError, scaper.generate_from_jams, jam_file.name,
+        pytest.raises(ScaperError, dscaper.generate_from_jams, jam_file.name,
                       gen_file.name)
 
     # # Make sure we can load an old JAM file that doesn't have fix_cilpping or peak_normalization
@@ -227,7 +227,7 @@ def test_generate_from_jams(atol=1e-5, rtol=1e-8):
         tmpfiles.extend([gen_audio_file, gen_jam_file, gen_txt_file])
 
         (fj_soundscape_audio, fj_soundscape_jam, fj_annotation_list, fj_event_audio_list) =  \
-            scaper.generate_from_jams(old_jam_file,
+            dscaper.generate_from_jams(old_jam_file,
                                       audio_outfile=gen_audio_file.name,
                                       jams_outfile=gen_jam_file.name,
                                       txt_path=gen_txt_file.name)
@@ -284,7 +284,7 @@ def test_generate_from_jams(atol=1e-5, rtol=1e-8):
         tmpfiles.append(gen_txt_file)
 
         # --- Define scaper --- *
-        sc = scaper.Scaper(10, FG_PATH, BG_PATH)
+        sc = dscaper.Scaper(10, FG_PATH, BG_PATH)
         sc.protected_labels = []
         sc.ref_db = -50
         sc.add_background(label=('choose', []),
@@ -302,7 +302,7 @@ def test_generate_from_jams(atol=1e-5, rtol=1e-8):
                          time_stretch=('uniform', 0.8, 1.2))
 
         # --- Define CLIPPING scaper --- *
-        sc_clipping = scaper.Scaper(10, FG_PATH, BG_PATH)
+        sc_clipping = dscaper.Scaper(10, FG_PATH, BG_PATH)
         sc_clipping.protected_labels = []
         sc_clipping.ref_db = 0
         sc_clipping.add_background(label=('choose', []),
@@ -350,7 +350,7 @@ def test_generate_from_jams(atol=1e-5, rtol=1e-8):
                             disable_instantiation_warnings=True)
 
             (fj_soundscape_audio, fj_soundscape_jam, fj_annotation_list, fj_event_audio_list) = \
-                scaper.generate_from_jams(orig_jam_file.name,
+                dscaper.generate_from_jams(orig_jam_file.name,
                                           audio_outfile=gen_wav_file.name,
                                           jams_outfile=gen_jam_file.name,
                                           txt_path=gen_txt_file.name)
@@ -411,7 +411,7 @@ def test_generate_from_jams(atol=1e-5, rtol=1e-8):
                    ann.sandbox.scaper.ref_db
 
             (fj_soundscape_audio, fj_soundscape_jam, fj_annotation_list, fj_event_audio_list) = \
-                scaper.generate_from_jams(orig_jam_file.name,
+                dscaper.generate_from_jams(orig_jam_file.name,
                                           audio_outfile=gen_wav_file.name,
                                           jams_outfile=gen_jam_file.name,
                                           txt_path=gen_txt_file.name)
@@ -456,7 +456,7 @@ def test_generate_from_jams(atol=1e-5, rtol=1e-8):
                    ann.sandbox.scaper.ref_db
 
             (fj_soundscape_audio, fj_soundscape_jam, fj_annotation_list, fj_event_audio_list) = \
-                scaper.generate_from_jams(orig_jam_file.name,
+                dscaper.generate_from_jams(orig_jam_file.name,
                                           audio_outfile=gen_wav_file.name,
                                           jams_outfile=gen_jam_file.name,
                                           txt_path=gen_txt_file.name)
@@ -522,7 +522,7 @@ def test_generate_from_jams(atol=1e-5, rtol=1e-8):
                    ann.sandbox.scaper.ref_db
 
             (fj_soundscape_audio, fj_soundscape_jam, fj_annotation_list, fj_event_audio_list) = \
-                scaper.generate_from_jams(orig_jam_file.name,
+                dscaper.generate_from_jams(orig_jam_file.name,
                                           audio_outfile=gen_wav_file.name,
                                           jams_outfile=gen_jam_file.name,
                                           txt_path=gen_txt_file.name)
@@ -570,11 +570,11 @@ def test_generate_from_jams(atol=1e-5, rtol=1e-8):
                             save_isolated_events=True, 
                             isolated_events_path=orig_events_path)
 
-                scaper.trim(orig_wav_file.name, orig_jam_file.name,
+                dscaper.trim(orig_wav_file.name, orig_jam_file.name,
                             orig_wav_file.name, orig_jam_file.name,
                             np.random.uniform(0, 5), np.random.uniform(5, 10))
 
-                scaper.generate_from_jams(orig_jam_file.name,
+                dscaper.generate_from_jams(orig_jam_file.name,
                                           audio_outfile=gen_wav_file.name,
                                           txt_path=gen_txt_file.name,
                                           save_isolated_events=True, 
@@ -601,14 +601,14 @@ def test_generate_from_jams(atol=1e-5, rtol=1e-8):
                             save_isolated_events=True, 
                             isolated_events_path=orig_events_path)
 
-                scaper.trim(orig_wav_file.name, orig_jam_file.name,
+                dscaper.trim(orig_wav_file.name, orig_jam_file.name,
                             orig_wav_file.name, orig_jam_file.name,
                             np.random.uniform(0, 2), np.random.uniform(8, 10))
-                scaper.trim(orig_wav_file.name, orig_jam_file.name,
+                dscaper.trim(orig_wav_file.name, orig_jam_file.name,
                             orig_wav_file.name, orig_jam_file.name,
                             np.random.uniform(0, 2), np.random.uniform(4, 6))
 
-                scaper.generate_from_jams(orig_jam_file.name, gen_wav_file.name,
+                dscaper.generate_from_jams(orig_jam_file.name, gen_wav_file.name,
                                           save_isolated_events=True, 
                                           isolated_events_path=gen_events_path)
 
@@ -633,17 +633,17 @@ def test_generate_from_jams(atol=1e-5, rtol=1e-8):
                             save_isolated_events=True, 
                             isolated_events_path=orig_events_path)
 
-                scaper.trim(orig_wav_file.name, orig_jam_file.name,
+                dscaper.trim(orig_wav_file.name, orig_jam_file.name,
                             orig_wav_file.name, orig_jam_file.name,
                             np.random.uniform(0, 2), np.random.uniform(8, 10))
-                scaper.trim(orig_wav_file.name, orig_jam_file.name,
+                dscaper.trim(orig_wav_file.name, orig_jam_file.name,
                             orig_wav_file.name, orig_jam_file.name,
                             np.random.uniform(0, 1), np.random.uniform(5, 6))
-                scaper.trim(orig_wav_file.name, orig_jam_file.name,
+                dscaper.trim(orig_wav_file.name, orig_jam_file.name,
                             orig_wav_file.name, orig_jam_file.name,
                             np.random.uniform(0, 1), np.random.uniform(3, 4))
 
-                scaper.generate_from_jams(orig_jam_file.name, gen_wav_file.name,
+                dscaper.generate_from_jams(orig_jam_file.name, gen_wav_file.name,
                                           save_isolated_events=True, 
                                           isolated_events_path=gen_events_path)
 
@@ -662,7 +662,7 @@ def test_generate_from_jams(atol=1e-5, rtol=1e-8):
                         disable_instantiation_warnings=True)
 
             (fj_soundscape_audio, fj_soundscape_jam, fj_annotation_list, fj_event_audio_list) = \
-                scaper.generate_from_jams(orig_jam_file.name,
+                dscaper.generate_from_jams(orig_jam_file.name,
                                       audio_outfile=gen_wav_file.name,
                                       txt_path=gen_txt_file.name,
                                       fg_path=ALT_FG_PATH,
@@ -697,7 +697,7 @@ def test_generate_from_jams(atol=1e-5, rtol=1e-8):
             _compare_txt_annotation(orig_txt_file.name, gen_txt_file.name)
 
         # Ensure jam file saved correctly
-        scaper.generate_from_jams(orig_jam_file.name,
+        dscaper.generate_from_jams(orig_jam_file.name,
                                   audio_outfile=gen_wav_file.name,
                                   jams_outfile=gen_jam_file.name)
         orig_jam = jams.load(orig_jam_file.name)
@@ -736,7 +736,7 @@ def test_trim(atol=1e-5, rtol=1e-8):
         tmpfiles.append(trimstrict_jam_file)
 
         # --- Create soundscape and save to tempfiles --- #
-        sc = scaper.Scaper(10, FG_PATH, BG_PATH)
+        sc = dscaper.Scaper(10, FG_PATH, BG_PATH)
         sc.protected_labels = []
         sc.ref_db = -50
         sc.add_background(label=('const', 'park'),
@@ -757,7 +757,7 @@ def test_trim(atol=1e-5, rtol=1e-8):
                     disable_instantiation_warnings=True)
 
         # --- Trim soundscape using scaper.trim with strict=False --- #
-        scaper.trim(orig_wav_file.name, orig_jam_file.name,
+        dscaper.trim(orig_wav_file.name, orig_jam_file.name,
                     trim_wav_file.name, trim_jam_file.name,
                     3, 7, no_audio=False)
 
@@ -801,41 +801,41 @@ def test_trim(atol=1e-5, rtol=1e-8):
 
 
 def test_get_value_from_dist():
-    rng = scaper.util._check_random_state(0)
+    rng = dscaper.util._check_random_state(0)
     # const
-    x = scaper.core._get_value_from_dist(('const', 1), rng)
+    x = dscaper.core._get_value_from_dist(('const', 1), rng)
     assert x == 1
 
     # choose
     for _ in range(10):
-        x = scaper.core._get_value_from_dist(('choose', [1, 2, 3]), rng)
+        x = dscaper.core._get_value_from_dist(('choose', [1, 2, 3]), rng)
         assert x in [1, 2, 3]
 
     # uniform
     for _ in range(10):
-        x = scaper.core._get_value_from_dist(('choose', [1, 2, 3]), rng)
+        x = dscaper.core._get_value_from_dist(('choose', [1, 2, 3]), rng)
         assert x in [1, 2, 3]
 
     # normal
     for _ in range(10):
-        x = scaper.core._get_value_from_dist(('normal', 5, 1), rng)
-        assert scaper.util.is_real_number(x)
+        x = dscaper.core._get_value_from_dist(('normal', 5, 1), rng)
+        assert dscaper.util.is_real_number(x)
 
     # truncnorm
     for _ in range(10):
-        x = scaper.core._get_value_from_dist(('truncnorm', 5, 10, 0, 10), rng)
-        assert scaper.util.is_real_number(x)
+        x = dscaper.core._get_value_from_dist(('truncnorm', 5, 10, 0, 10), rng)
+        assert dscaper.util.is_real_number(x)
         assert 0 <= x <= 10
 
     # COPY TESTS FROM test_validate_distribution (to ensure validation applied)
     def __test_bad_tuple_list(tuple_list):
-        rng = scaper.util._check_random_state(0)
+        rng = dscaper.util._check_random_state(0)
         for t in tuple_list:
             if isinstance(t, tuple):
                 print(t, len(t))
             else:
                 print(t)
-            pytest.raises(ScaperError, scaper.core._get_value_from_dist, t, random_state=rng)
+            pytest.raises(ScaperError, dscaper.core._get_value_from_dist, t, random_state=rng)
 
     # not tuple = error
     nontuples = [[], 5, 'yes']
@@ -875,56 +875,56 @@ def test_ensure_satisfiable_source_time_tuple():
     event_duration = 5
 
     _test_dist = ('uniform', 4, 10)
-    _adjusted, warn = scaper.core._ensure_satisfiable_source_time_tuple(
+    _adjusted, warn = dscaper.core._ensure_satisfiable_source_time_tuple(
         _test_dist, source_duration, event_duration)
     assert (warn)
     assert np.allclose(_adjusted[1:], (4, 5))
 
     _test_dist = ('truncnorm', 8, 1, 4, 10)
-    _adjusted, warn = scaper.core._ensure_satisfiable_source_time_tuple(
+    _adjusted, warn = dscaper.core._ensure_satisfiable_source_time_tuple(
         _test_dist, source_duration, event_duration)
     assert (warn)
     assert np.allclose(_adjusted[1:], (5, 1, 4, 5))
 
     _test_dist = ('const', 6)
-    _adjusted, warn = scaper.core._ensure_satisfiable_source_time_tuple(
+    _adjusted, warn = dscaper.core._ensure_satisfiable_source_time_tuple(
         _test_dist, source_duration, event_duration)
     assert (warn)
     assert np.allclose(_adjusted[1:], (5))
 
     _test_dist = ('uniform', 1, 10)
-    _adjusted, warn = scaper.core._ensure_satisfiable_source_time_tuple(
+    _adjusted, warn = dscaper.core._ensure_satisfiable_source_time_tuple(
         _test_dist, source_duration, event_duration)
     assert (warn)
     assert np.allclose(_adjusted[1:], (1, 5))
 
     _test_dist = ('truncnorm', 4, 1, 1, 10)
-    _adjusted, warn = scaper.core._ensure_satisfiable_source_time_tuple(
+    _adjusted, warn = dscaper.core._ensure_satisfiable_source_time_tuple(
         _test_dist, source_duration, event_duration)
     assert (warn)
     assert np.allclose(_adjusted[1:], (4, 1, 1, 5))
 
     _test_dist = ('uniform', 6, 10)
-    _adjusted, warn = scaper.core._ensure_satisfiable_source_time_tuple(
+    _adjusted, warn = dscaper.core._ensure_satisfiable_source_time_tuple(
         _test_dist, source_duration, event_duration)
     assert (warn)
     assert np.allclose(_adjusted[1], (5))
 
     _test_dist = ('truncnorm', 8, 1, 6, 10)
-    _adjusted, warn = scaper.core._ensure_satisfiable_source_time_tuple(
+    _adjusted, warn = dscaper.core._ensure_satisfiable_source_time_tuple(
         _test_dist, source_duration, event_duration)
     assert (warn)
     assert np.allclose(_adjusted[1], (5))
 
     _test_dist = ('choose', [0, 1, 2, 10, 12, 15, 20])
-    _adjusted, warn = scaper.core._ensure_satisfiable_source_time_tuple(
+    _adjusted, warn = dscaper.core._ensure_satisfiable_source_time_tuple(
         _test_dist, source_duration, event_duration)
     assert (warn)
     assert np.allclose(_adjusted[1], [0, 1, 2, 5])
 
     _test_dist = ('choose_weighted', [0, 1, 2, 10, 12, 15, 20], 
                   [0.1, 0.2, 0.05, 0.05, 0.3, 0.1, 0.2])
-    _adjusted, warn = scaper.core._ensure_satisfiable_source_time_tuple(
+    _adjusted, warn = dscaper.core._ensure_satisfiable_source_time_tuple(
         _test_dist, source_duration, event_duration)
     assert (warn)
     assert np.allclose(_adjusted[1], [0, 1, 2, 5, 5, 5, 5])
@@ -939,7 +939,7 @@ def test_validate_distribution():
                 print(t, len(t))
             else:
                 print(t)
-            pytest.raises(ScaperError, scaper.core._validate_distribution, t)
+            pytest.raises(ScaperError, dscaper.core._validate_distribution, t)
 
     # not tuple = error
     nontuples = [[], 5, 'yes']
@@ -989,19 +989,19 @@ def test_validate_label():
 
     # label must be in list of allowed labels
     allowed_labels = ['yes']
-    pytest.raises(ScaperError, scaper.core._validate_label, ('const', 'no'),
+    pytest.raises(ScaperError, dscaper.core._validate_label, ('const', 'no'),
                   allowed_labels)
 
     # Choose list must be subset of allowed labels
     allowed_labels = ['yes', 'hello']
-    pytest.raises(ScaperError, scaper.core._validate_label, ('choose', ['no']),
+    pytest.raises(ScaperError, dscaper.core._validate_label, ('choose', ['no']),
                   allowed_labels)
 
     # Label tuple must start with either 'const' or 'choose'
     bad_label_dists = [('uniform', 0, 1), ('normal', 0, 1),
                        ('truncnorm', 0, 1, 0, 1)]
     for bld in bad_label_dists:
-        pytest.raises(ScaperError, scaper.core._validate_label, bld,
+        pytest.raises(ScaperError, dscaper.core._validate_label, bld,
                       allowed_labels)
 
 
@@ -1011,15 +1011,15 @@ def test_validate_source_file():
     # create temp folder so we have path to file we know doesn't exist
     with backports.tempfile.TemporaryDirectory() as tmpdir:
         nonfile = os.path.join(tmpdir, 'notafile')
-        pytest.raises(ScaperError, scaper.core._validate_source_file,
+        pytest.raises(ScaperError, dscaper.core._validate_source_file,
                       ('const', nonfile), ('const', 'siren'))
 
     # label must be const and match file foldername
     sourcefile = 'tests/data/audio/foreground/siren/69-Siren-1.wav'
-    pytest.raises(ScaperError, scaper.core._validate_source_file,
+    pytest.raises(ScaperError, dscaper.core._validate_source_file,
                   ('const', sourcefile), ('choose', []))
 
-    pytest.raises(ScaperError, scaper.core._validate_source_file,
+    pytest.raises(ScaperError, dscaper.core._validate_source_file,
                   ('const', sourcefile), ('const', 'car_horn'))
 
     # if choose, all files in list of files must exist
@@ -1027,21 +1027,21 @@ def test_validate_source_file():
     with backports.tempfile.TemporaryDirectory() as tmpdir:
         nonfile = os.path.join(tmpdir, 'notafile')
         source_file_list = [sourcefile, nonfile]
-        pytest.raises(ScaperError, scaper.core._validate_source_file,
+        pytest.raises(ScaperError, dscaper.core._validate_source_file,
                       ('choose', source_file_list), ('const', 'siren'))
 
     # must be const or choose
     bad_label_dists = [('uniform', 0, 1), ('normal', 0, 1),
                        ('truncnorm', 0, 1, 0, 1)]
     for bld in bad_label_dists:
-        pytest.raises(ScaperError, scaper.core._validate_source_file, bld,
+        pytest.raises(ScaperError, dscaper.core._validate_source_file, bld,
                       ('const', 'siren'))
 
 
 def test_validate_time():
 
     def __test_bad_time_tuple(time_tuple):
-        pytest.raises(ScaperError, scaper.core._validate_time, time_tuple)
+        pytest.raises(ScaperError, dscaper.core._validate_time, time_tuple)
 
     # bad consts
     bad_time_values = [None, -1, 1j, 'yes', [], [5]]
@@ -1059,7 +1059,7 @@ def test_validate_time():
     __test_bad_time_tuple(('uniform', -1, 1))
 
     # using normal will issue a warning since it can generate neg values
-    pytest.warns(ScaperWarning, scaper.core._validate_time, ('normal', 5, 2))
+    pytest.warns(ScaperWarning, dscaper.core._validate_time, ('normal', 5, 2))
 
     # truncnorm can't have negative min value
     __test_bad_time_tuple(('truncnorm', 0, 1, -1, 1))
@@ -1068,7 +1068,7 @@ def test_validate_time():
 def test_validate_duration():
 
     def __test_bad_duration_tuple(duration_tuple):
-        pytest.raises(ScaperError, scaper.core._validate_duration,
+        pytest.raises(ScaperError, dscaper.core._validate_duration,
                       duration_tuple)
 
     # bad consts
@@ -1088,7 +1088,7 @@ def test_validate_duration():
     __test_bad_duration_tuple(('uniform', 0, 1))
 
     # using normal will issue a warning since it can generate neg values
-    pytest.warns(ScaperWarning, scaper.core._validate_duration,
+    pytest.warns(ScaperWarning, dscaper.core._validate_duration,
                  ('normal', 5, 2))
 
     # truncnorm can't have negative or zero min value
@@ -1099,7 +1099,7 @@ def test_validate_duration():
 def test_validate_snr():
 
     def __test_bad_snr_tuple(snr_tuple):
-        pytest.raises(ScaperError, scaper.core._validate_snr, snr_tuple)
+        pytest.raises(ScaperError, dscaper.core._validate_snr, snr_tuple)
 
     # bad consts
     bad_snr_values = [None, 1j, 'yes', [], [5]]
@@ -1117,7 +1117,7 @@ def test_validate_snr():
 def test_validate_pitch_shift():
 
     def __test_bad_ps_tuple(ps_tuple):
-        pytest.raises(ScaperError, scaper.core._validate_pitch_shift, ps_tuple)
+        pytest.raises(ScaperError, dscaper.core._validate_pitch_shift, ps_tuple)
 
     # bad consts
     bad_ps_values = [None, 1j, 'yes', [], [5]]
@@ -1135,7 +1135,7 @@ def test_validate_pitch_shift():
 def test_validate_time_stretch():
 
     def __test_bad_ts_tuple(ts_tuple):
-        pytest.raises(ScaperError, scaper.core._validate_time_stretch,
+        pytest.raises(ScaperError, dscaper.core._validate_time_stretch,
                       ts_tuple)
 
     # bad consts
@@ -1158,41 +1158,41 @@ def test_validate_time_stretch():
 
     # Using normal dist must raise warning since can give neg or 0 values
     pytest.warns(
-        ScaperWarning, scaper.core._validate_time_stretch, ('normal', 5, 1))
+        ScaperWarning, dscaper.core._validate_time_stretch, ('normal', 5, 1))
 
 
 def test_validate_position():
     # position must not contain spaces
-    pytest.raises(ScaperError, scaper.core._validate_position,"with space")
+    pytest.raises(ScaperError, dscaper.core._validate_position,"with space")
     # position must be a string or None
-    pytest.raises(ScaperError, scaper.core._validate_position, 5)
-    pytest.raises(ScaperError, scaper.core._validate_position, ['list'])
+    pytest.raises(ScaperError, dscaper.core._validate_position, 5)
+    pytest.raises(ScaperError, dscaper.core._validate_position, ['list'])
     # position must not be an empty string
-    pytest.raises(ScaperError, scaper.core._validate_position, "")
+    pytest.raises(ScaperError, dscaper.core._validate_position, "")
     # even_type can be None
-    scaper.core._validate_position(None)
+    dscaper.core._validate_position(None)
     # position can be a string
-    scaper.core._validate_position("valid_event-type")
+    dscaper.core._validate_position("valid_event-type")
 
 
 def test_validate_library():
     # library must be a string
-    pytest.raises(ScaperError, scaper.core._validate_library, 5)
-    pytest.raises(ScaperError, scaper.core._validate_library, ['list'])
+    pytest.raises(ScaperError, dscaper.core._validate_library, 5)
+    pytest.raises(ScaperError, dscaper.core._validate_library, ['list'])
     # library must not be an empty string
-    pytest.raises(ScaperError, scaper.core._validate_library, "")
+    pytest.raises(ScaperError, dscaper.core._validate_library, "")
     # invalid library path
     invalid_path = os.path.join(os.getcwd(), 'tests', 'data', 'libraries', 'invalidlib')
-    pytest.raises(ScaperError, scaper.core._validate_library, invalid_path)
+    pytest.raises(ScaperError, dscaper.core._validate_library, invalid_path)
     # library path without subfolders
     no_subfolders_path = os.path.join(os.getcwd(), 'tests', 'data', 'libraries', 'emptylib')
-    pytest.raises(ScaperError, scaper.core._validate_library, no_subfolders_path)
+    pytest.raises(ScaperError, dscaper.core._validate_library, no_subfolders_path)
     # library path with subfolders but no audio files
     no_audio_files_path = os.path.join(os.getcwd(), 'tests', 'data', 'libraries', 'noaudio')
-    pytest.raises(ScaperError, scaper.core._validate_library, no_audio_files_path)
+    pytest.raises(ScaperError, dscaper.core._validate_library, no_audio_files_path)
     # valid library path
     valid_path = os.path.join(os.getcwd(), 'tests', 'data', 'libraries', 'testlib')
-    scaper.core._validate_library(valid_path)
+    dscaper.core._validate_library(valid_path)
 
 
 def test_validate_event():
@@ -1200,7 +1200,7 @@ def test_validate_event():
     bad_allowed_labels = [0, 'yes', 1j, np.array([1, 2, 3])]
 
     for bal in bad_allowed_labels:
-        pytest.raises(ScaperError, scaper.core._validate_event,
+        pytest.raises(ScaperError, dscaper.core._validate_event,
                       label=('choose', []),
                       source_file=('choose', []),
                       source_time=('const', 0),
@@ -1220,25 +1220,25 @@ def test_scaper_init():
     '''
 
     # bad duration
-    sc = pytest.raises(ScaperError, scaper.Scaper, -5, FG_PATH, BG_PATH)
+    sc = pytest.raises(ScaperError, dscaper.Scaper, -5, FG_PATH, BG_PATH)
 
     # all args valid
-    sc = scaper.Scaper(10.0, FG_PATH, BG_PATH)
+    sc = dscaper.Scaper(10.0, FG_PATH, BG_PATH)
     assert sc.fg_path == FG_PATH
     assert sc.bg_path == BG_PATH
 
     # bad fg path
-    sc = pytest.raises(ScaperError, scaper.Scaper, 10.0,
+    sc = pytest.raises(ScaperError, dscaper.Scaper, 10.0,
                        'tests/data/audio/wrong',
                        BG_PATH)
 
     # bad bg path
-    sc = pytest.raises(ScaperError, scaper.Scaper, 10.0,
+    sc = pytest.raises(ScaperError, dscaper.Scaper, 10.0,
                        FG_PATH,
                        'tests/data/audio/wrong')
 
     # ensure fg_labels and bg_labels populated properly
-    sc = scaper.Scaper(10.0, FG_PATH, BG_PATH)
+    sc = dscaper.Scaper(10.0, FG_PATH, BG_PATH)
     assert sc.fg_labels == FB_LABELS
     assert sc.bg_labels == BG_LABELS
 
@@ -1264,7 +1264,7 @@ def test_reset_fg_bg_event_spec():
     def _add_bg_event(sc):
         sc.add_background(("const", "park"), ("choose", []), ("const", 0))
 
-    sc = scaper.Scaper(
+    sc = dscaper.Scaper(
         10.0, fg_path=FG_PATH, bg_path=BG_PATH, random_state=0)
 
     # there should be no events initially
@@ -1314,7 +1314,7 @@ def test_scaper_add_background():
     Test Scaper.add_background function
 
     '''
-    sc = scaper.Scaper(10.0, FG_PATH, BG_PATH)
+    sc = dscaper.Scaper(10.0, FG_PATH, BG_PATH)
 
     # Set concrete background label
     # label, source_file, source_time
@@ -1341,7 +1341,7 @@ def test_scaper_add_background():
 
 def test_scaper_add_event():
 
-    sc = scaper.Scaper(10.0, FG_PATH, BG_PATH)
+    sc = dscaper.Scaper(10.0, FG_PATH, BG_PATH)
 
     # Initially fg_spec should be empty
     assert sc.fg_spec == []
@@ -1391,7 +1391,7 @@ def test_scaper_instantiate_event():
                          text=None)
 
     # test valid case
-    sc = scaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
+    sc = dscaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
     instantiated_event = sc._instantiate_event(
         fg_event, isbackground=False, allow_repeated_label=True,
         allow_repeated_source=True, used_labels=[], used_source_files=[],
@@ -1404,7 +1404,7 @@ def test_scaper_instantiate_event():
     assert 1 <= instantiated_event.event_duration <= 3
     assert 10 <= instantiated_event.snr <= 20
     assert instantiated_event.role == 'foreground'
-    assert scaper.util.is_real_number(instantiated_event.pitch_shift)
+    assert dscaper.util.is_real_number(instantiated_event.pitch_shift)
     assert 0.8 <= instantiated_event.time_stretch <= 1.2
 
     # when a label needs to be replaced because it's used already
@@ -1439,7 +1439,7 @@ def test_scaper_instantiate_event():
             '42-Human-Vocal-Voice-taxi-2_edit.wav')
 
     # Protected labels must have original source duration and source time 0
-    sc = scaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH,
+    sc = dscaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH,
                        protected_labels='human_voice')
     fg_event10 = fg_event._replace(
         label=('const', 'human_voice'),
@@ -1453,7 +1453,7 @@ def test_scaper_instantiate_event():
     assert np.allclose(instantiated_event.event_duration, 0.806236, atol=1e-5)
 
     # repeated label when not allowed throws error
-    sc = scaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
+    sc = dscaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
     pytest.raises(ScaperError, sc._instantiate_event, fg_event,
                   isbackground=False,
                   allow_repeated_label=False,
@@ -1572,7 +1572,7 @@ def test_scaper_instantiate():
         REG_JAM_PATH = TEST_PATHS[sr]['REG'].jams
         # Here we just instantiate a known fixed spec and check if that jams
         # we get back is as expected.
-        sc = scaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
+        sc = dscaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
         sc.ref_db = -50
         sc.sr = sr
 
@@ -1657,9 +1657,9 @@ def test_generate_with_seeding(atol=1e-4, rtol=1e-8):
     # over and over to make sure the output wav stays the same
     seeds = [
         0, 10, 20, 
-        scaper.util._check_random_state(0),
-        scaper.util._check_random_state(10),
-        scaper.util._check_random_state(20)
+        dscaper.util._check_random_state(0),
+        dscaper.util._check_random_state(10),
+        dscaper.util._check_random_state(20)
     ]
     num_generators = 2
     for seed in seeds:
@@ -1675,9 +1675,9 @@ def test_set_random_state(atol=1e-4, rtol=1e-8):
     # set_random_state to change the seed instead 
     seeds = [
         0, 10, 20, 
-        scaper.util._check_random_state(0),
-        scaper.util._check_random_state(10),
-        scaper.util._check_random_state(20)
+        dscaper.util._check_random_state(0),
+        dscaper.util._check_random_state(10),
+        dscaper.util._check_random_state(20)
     ]
     num_generators = 2
     for seed in seeds:
@@ -1749,7 +1749,7 @@ def _compare_generators(generators, atol=1e-4, rtol=1e-8):
 
 
 def _create_scaper_with_random_seed(seed):
-    sc = scaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH, random_state=deepcopy(seed))
+    sc = dscaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH, random_state=deepcopy(seed))
     sc.ref_db = -50
     sc.sr = 44100
 
@@ -1806,7 +1806,7 @@ def _test_generate_audio(SR, REG_WAV_PATH, REG_BGONLY_WAV_PATH, REG_REVERB_WAV_P
     # Regression test: same spec, same audio (not this will fail if we update
     # any of the audio processing techniques used (e.g. change time stretching
     # algorithm.
-    sc = scaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
+    sc = dscaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
     sc.ref_db = -50
     sc.sr = SR
     sc.n_channels = N_CHANNELS
@@ -1906,14 +1906,14 @@ def _test_generate_audio(SR, REG_WAV_PATH, REG_BGONLY_WAV_PATH, REG_REVERB_WAV_P
                       jam.annotations[0])
 
         # soundscape with no events will raise warning and won't generate audio
-        sc = scaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
+        sc = dscaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
         sc.ref_db = -50
         jam = sc._instantiate(disable_instantiation_warnings=True)
         pytest.warns(ScaperWarning, sc._generate_audio, wav_file.name,
                      jam.annotations[0])
 
         # soundscape with only one event will use transformer (regression test)
-        sc = scaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
+        sc = dscaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
         sc.ref_db = -20
         sc.sr = SR
         # background
@@ -1936,7 +1936,7 @@ def _test_generate_audio(SR, REG_WAV_PATH, REG_BGONLY_WAV_PATH, REG_REVERB_WAV_P
 
 
 def create_scaper_scene_without_random_seed():
-    sc = scaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
+    sc = dscaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
     sc.ref_db = -50
     sc.sr = 44100
 
@@ -2079,7 +2079,7 @@ def test_generate_isolated_positions():
     soundscape_duration = 10.0
     foreground_folder = os.path.join(path_to_audio, 'foreground')
     background_folder = os.path.join(path_to_audio, 'background')
-    sc = scaper.Scaper(soundscape_duration, foreground_folder, background_folder)
+    sc = dscaper.Scaper(soundscape_duration, foreground_folder, background_folder)
     sc.ref_db = -20
     sc.sr = 44100
 
@@ -2149,7 +2149,7 @@ def test_generate_isolated_positions():
 def test_generate_from_library():
 
     soundscape_duration = 10.0
-    sc = scaper.Scaper(soundscape_duration, None, None)
+    sc = dscaper.Scaper(soundscape_duration, None, None)
     sc.ref_db = -20
     sc.sr = 44100
 
@@ -2200,7 +2200,7 @@ def test_generate():
 
 def _make_test_generate_scaper(SR):
 
-    sc = scaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
+    sc = dscaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)
     sc.ref_db = -50
     sc.sr = SR
 
@@ -2375,7 +2375,7 @@ def test_scaper_off_by_one_with_jams():
     tmpfiles = []
     with _close_temp_files(tmpfiles):
         gen_wav_file = tempfile.NamedTemporaryFile(suffix='.wav', delete=True)
-        scaper.generate_from_jams(jam_file, gen_wav_file.name)
+        dscaper.generate_from_jams(jam_file, gen_wav_file.name)
         gen_wav, sr = soundfile.read(gen_wav_file.name)
 
         assert gen_wav.shape[0] == 10 * 44100
@@ -2393,13 +2393,13 @@ def test_backwards_compat_for_duration():
 
             jam = jams.load(REG_JAM_PATH)
 
-            scaper.generate_from_jams(REG_JAM_PATH, orig_wav.name)
+            dscaper.generate_from_jams(REG_JAM_PATH, orig_wav.name)
 
             ann = jam.annotations[0]
             ann.sandbox.scaper.pop('original_duration')
             jam.save(jam_without_orig_duration.name)
 
-            scaper.generate_from_jams(
+            dscaper.generate_from_jams(
                 jam_without_orig_duration.name, gen_wav.name)
 
             orig_audio, sr = soundfile.read(orig_wav.name)
@@ -2407,7 +2407,7 @@ def test_backwards_compat_for_duration():
 
             assert np.allclose(orig_audio, gen_audio)
 
-            pytest.warns(ScaperWarning, scaper.generate_from_jams,
+            pytest.warns(ScaperWarning, dscaper.generate_from_jams,
                 jam_without_orig_duration.name, gen_wav.name)
 
 
@@ -2418,7 +2418,7 @@ def _generate_soundscape_with_short_background(background_file, audio_path, jams
         OUTPUT_PATH = os.path.join(subdir, 'noise', 'noise.wav')
         shutil.copyfile(background_file, OUTPUT_PATH)
 
-        sc = scaper.Scaper(10, FG_PATH, subdir, random_state=0)
+        sc = dscaper.Scaper(10, FG_PATH, subdir, random_state=0)
         sc.sr = 16000
         sc.ref_db = ref_db
         sc.fade_in_len = 0
@@ -2443,7 +2443,7 @@ def test_scaper_generate_with_fade():
 
     for fade_in in fade_lens:
         for fade_out in fade_lens:
-            sc = scaper.Scaper(0.2, FG_PATH, BG_PATH, random_state=0)
+            sc = dscaper.Scaper(0.2, FG_PATH, BG_PATH, random_state=0)
             sc.sr = 16000
             sc.ref_db = -20
 
@@ -2534,7 +2534,7 @@ def test_scaper_with_short_background():
 def test_clipping_and_normalization():
 
     for sr in [16000, 44100]:
-        sc = scaper.Scaper(10, FG_PATH, BG_PATH, random_state=0)
+        sc = dscaper.Scaper(10, FG_PATH, BG_PATH, random_state=0)
         sc.sr = sr
         sc.ref_db = -20
 
@@ -2549,7 +2549,7 @@ def test_clipping_and_normalization():
             time_stretch=None)
 
         # extreme clipping
-        sc_extreme = scaper.Scaper(10, FG_PATH, BG_PATH, random_state=0)
+        sc_extreme = dscaper.Scaper(10, FG_PATH, BG_PATH, random_state=0)
         sc_extreme.sr = 16000
         sc_extreme.ref_db = -20
 

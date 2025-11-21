@@ -1,15 +1,15 @@
 import pytest
 
-from scaper import dscaper
-from scaper.dscaper import Dscaper
-from scaper.dscaper_datatypes import *
+from dscaper import dscaper
+from dscaper.dscaper import Dscaper
+from dscaper.dscaper_datatypes import *
 import os
 import tempfile
 import shutil
 import uuid
 import json
 import soundfile as sf
-from scaper.dscaper_datatypes import (
+from dscaper.dscaper_datatypes import (
     DscaperApiResponse,
     DscaperAudio,
     DscaperTimeline,

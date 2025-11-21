@@ -1,7 +1,7 @@
 from fastapi import APIRouter, File, Form
 from typing import Annotated
-from scaper.dscaper_datatypes import DscaperAudio
-from scaper import dscaper
+from dscaper.dscaper_datatypes import DscaperAudio
+from dscaper import dscaper
 from web.api.datatypes import DscaperWebResponse
 
 

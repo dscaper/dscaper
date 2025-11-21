@@ -2,11 +2,11 @@ from setuptools import setup
 import importlib.util
 import sys
 
-spec = importlib.util.spec_from_file_location('scaper.version', 'scaper/version.py')
+spec = importlib.util.spec_from_file_location('dscaper.version', 'dscaper/version.py')
 if spec is None or spec.loader is None:
-    raise ImportError("Could not load spec or loader for 'scaper.version'")
+    raise ImportError("Could not load spec or loader for 'dscaper.version'")
 version = importlib.util.module_from_spec(spec)
-sys.modules['scaper.version'] = version
+sys.modules['dscaper.version'] = version
 spec.loader.exec_module(version)
 
 
@@ -20,9 +20,9 @@ setup(
     description='A library for soundscape synthesis and augmentation',
     author='Justin Salamon, Duncan MacConnell, David Grünert',
     author_email='justin.salamon@gmail.com',
-    url='https://github.com/cyrta/dscaper',
+    url='github.com/dscaper/dscaper',
     download_url='',
-    packages=['scaper'],
+    packages=['dscaper'],
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='audio sound soundscape environmental dsp mixing',
@@ -37,11 +37,12 @@ setup(
             "Programming Language :: Python :: 3.12",
         ],
     install_requires=[
-        # 'sox',
-        # 'jams',
-        # 'numpy',
-        # 'pyloudnorm',
-        # 'soundfile',
+        'sox',
+        'soundfile',
+        'scipy',
+        'fastapi',
+        'jams',
+        'pyloudnorm',
     ],
     extras_require={
         'docs': [

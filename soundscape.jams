@@ -1,0 +1,685 @@
+{
+  "annotations": [
+    {
+      "annotation_metadata": {
+        "curator": {
+          "name": "",
+          "email": ""
+        },
+        "annotator": {},
+        "version": "",
+        "corpus": "",
+        "annotation_tools": "",
+        "annotation_rules": "",
+        "validation": "",
+        "data_source": ""
+      },
+      "namespace": "scaper",
+      "data": [
+        {
+          "time": 0.0,
+          "duration": 10.0,
+          "value": {
+            "label": "park",
+            "source_file": "/home/grud/jsalt25/dscaper-new/dscaper/tests/data/audio/background/park/268903__yonts__city-park-tel-aviv-israel.wav",
+            "source_time": 0,
+            "event_time": 0,
+            "event_duration": 10.0,
+            "snr": 0,
+            "role": "background",
+            "pitch_shift": null,
+            "time_stretch": null,
+            "position": null,
+            "library": null,
+            "speaker": null,
+            "text": null
+          },
+          "confidence": 1.0
+        },
+        {
+          "time": 0.0,
+          "duration": 10.0,
+          "value": {
+            "label": "park",
+            "source_file": "/home/grud/jsalt25/dscaper-new/dscaper/tests/data/audio/background/park/268903__yonts__city-park-tel-aviv-israel.wav",
+            "source_time": 0,
+            "event_time": 0,
+            "event_duration": 10.0,
+            "snr": 0,
+            "role": "background",
+            "pitch_shift": null,
+            "time_stretch": null,
+            "position": null,
+            "library": null,
+            "speaker": null,
+            "text": null
+          },
+          "confidence": 1.0
+        },
+        {
+          "time": 0.28135562438253636,
+          "duration": 0.6875056689342404,
+          "value": {
+            "label": "car_horn",
+            "source_file": "/home/grud/jsalt25/dscaper-new/dscaper/tests/data/audio/foreground/car_horn/17-CAR-Rolls-Royce-Horn.wav",
+            "source_time": 0,
+            "event_time": 0.28135562438253636,
+            "event_duration": 0.6875056689342404,
+            "snr": 8.181332240415744,
+            "role": "foreground",
+            "pitch_shift": null,
+            "time_stretch": null,
+            "position": null,
+            "library": null,
+            "speaker": null,
+            "text": null
+          },
+          "confidence": 1.0
+        },
+        {
+          "time": 0.4702461345009573,
+          "duration": 1.0437654131919663,
+          "value": {
+            "label": "siren",
+            "source_file": "/home/grud/jsalt25/dscaper-new/dscaper/tests/data/audio/foreground/siren/69-Siren-1.wav",
+            "source_time": 0,
+            "event_time": 0.4702461345009573,
+            "event_duration": 1.1932124711860967,
+            "snr": 10.400719836199652,
+            "role": "foreground",
+            "pitch_shift": 1.0457538078423063,
+            "time_stretch": 0.8747523499770542,
+            "position": null,
+            "library": null,
+            "speaker": null,
+            "text": null
+          },
+          "confidence": 1.0
+        },
+        {
+          "time": 3.8015488933646076,
+          "duration": 1.9818401075900112,
+          "value": {
+            "label": "siren",
+            "source_file": "/home/grud/jsalt25/dscaper-new/dscaper/tests/data/audio/foreground/siren/69-Siren-1.wav",
+            "source_time": 0,
+            "event_time": 3.8015488933646076,
+            "event_duration": 1.9818401075900112,
+            "snr": 9.726433265794066,
+            "role": "foreground",
+            "pitch_shift": null,
+            "time_stretch": null,
+            "position": null,
+            "library": null,
+            "speaker": null,
+            "text": null
+          },
+          "confidence": 1.0
+        },
+        {
+          "time": 4.635860997227241,
+          "duration": 1.5395691609977324,
+          "value": {
+            "label": "human_voice",
+            "source_file": "/home/grud/jsalt25/dscaper-new/dscaper/tests/data/audio/foreground/human_voice/42-Human-Vocal-Voice-all-aboard_edit.wav",
+            "source_time": 0,
+            "event_time": 4.635860997227241,
+            "event_duration": 1.5395691609977324,
+            "snr": 8.518719226963508,
+            "role": "foreground",
+            "pitch_shift": null,
+            "time_stretch": null,
+            "position": null,
+            "library": null,
+            "speaker": null,
+            "text": null
+          },
+          "confidence": 1.0
+        },
+        {
+          "time": 5.7628808405797285,
+          "duration": 1.0,
+          "value": {
+            "label": "human_voice",
+            "source_file": "/home/grud/jsalt25/dscaper-new/dscaper/tests/data/audio/foreground/human_voice/42-Human-Vocal-Voice-taxi-1_edit.wav",
+            "source_time": 0,
+            "event_time": 5.7628808405797285,
+            "event_duration": 1.0,
+            "snr": 13.116766060872965,
+            "role": "foreground",
+            "pitch_shift": null,
+            "time_stretch": null,
+            "position": null,
+            "library": null,
+            "speaker": null,
+            "text": null
+          },
+          "confidence": 1.0
+        },
+        {
+          "time": 6.485373406633386,
+          "duration": 1.2916780045351475,
+          "value": {
+            "label": "car_horn",
+            "source_file": "/home/grud/jsalt25/dscaper-new/dscaper/tests/data/audio/foreground/car_horn/17-CAR-Rolls-Royce-Horn-2.wav",
+            "source_time": 0,
+            "event_time": 6.485373406633386,
+            "event_duration": 1.2916780045351475,
+            "snr": 10.060273938226192,
+            "role": "foreground",
+            "pitch_shift": null,
+            "time_stretch": null,
+            "position": null,
+            "library": null,
+            "speaker": null,
+            "text": null
+          },
+          "confidence": 1.0
+        },
+        {
+          "time": 7.434676352642931,
+          "duration": 1.4176815453790934,
+          "value": {
+            "label": "siren",
+            "source_file": "/home/grud/jsalt25/dscaper-new/dscaper/tests/data/audio/foreground/siren/69-Siren-1.wav",
+            "source_time": 0,
+            "event_time": 7.434676352642931,
+            "event_duration": 1.423490299895198,
+            "snr": 8.396121978268345,
+            "role": "foreground",
+            "pitch_shift": 0.8552667798189573,
+            "time_stretch": 0.9959193578512392,
+            "position": null,
+            "library": null,
+            "speaker": null,
+            "text": null
+          },
+          "confidence": 1.0
+        },
+        {
+          "time": 8.15148780174841,
+          "duration": 1.2916780045351475,
+          "value": {
+            "label": "car_horn",
+            "source_file": "/home/grud/jsalt25/dscaper-new/dscaper/tests/data/audio/foreground/car_horn/17-CAR-Rolls-Royce-Horn-2.wav",
+            "source_time": 0,
+            "event_time": 8.15148780174841,
+            "event_duration": 1.2916780045351475,
+            "snr": 14.658693418097481,
+            "role": "foreground",
+            "pitch_shift": null,
+            "time_stretch": null,
+            "position": null,
+            "library": null,
+            "speaker": null,
+            "text": null
+          },
+          "confidence": 1.0
+        }
+      ],
+      "sandbox": {
+        "scaper": {
+          "duration": 10.0,
+          "original_duration": 10.0,
+          "fg_path": "/home/grud/jsalt25/dscaper-new/dscaper/tests/data/audio/foreground",
+          "bg_path": "/home/grud/jsalt25/dscaper-new/dscaper/tests/data/audio/background",
+          "fg_spec": [
+            [
+              [
+                "const",
+                "siren"
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "uniform",
+                0,
+                9
+              ],
+              [
+                "truncnorm",
+                3,
+                1,
+                0.5,
+                5
+              ],
+              [
+                "normal",
+                10,
+                3
+              ],
+              "foreground",
+              [
+                "uniform",
+                -2,
+                2
+              ],
+              [
+                "uniform",
+                0.8,
+                1.2
+              ],
+              null,
+              null,
+              null,
+              null
+            ],
+            [
+              [
+                "choose",
+                [
+                  "car_horn",
+                  "siren"
+                ]
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "uniform",
+                0,
+                9
+              ],
+              [
+                "truncnorm",
+                3,
+                1,
+                0.5,
+                5
+              ],
+              [
+                "normal",
+                10,
+                3
+              ],
+              "foreground",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            [
+              [
+                "choose",
+                [
+                  "car_horn",
+                  "siren"
+                ]
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "uniform",
+                0,
+                9
+              ],
+              [
+                "truncnorm",
+                3,
+                1,
+                0.5,
+                5
+              ],
+              [
+                "normal",
+                10,
+                3
+              ],
+              "foreground",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            [
+              [
+                "const",
+                "siren"
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "uniform",
+                0,
+                9
+              ],
+              [
+                "truncnorm",
+                3,
+                1,
+                0.5,
+                5
+              ],
+              [
+                "normal",
+                10,
+                3
+              ],
+              "foreground",
+              [
+                "uniform",
+                -2,
+                2
+              ],
+              [
+                "uniform",
+                0.8,
+                1.2
+              ],
+              null,
+              null,
+              null,
+              null
+            ],
+            [
+              [
+                "choose",
+                [
+                  "car_horn",
+                  "siren"
+                ]
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "uniform",
+                0,
+                9
+              ],
+              [
+                "truncnorm",
+                3,
+                1,
+                0.5,
+                5
+              ],
+              [
+                "normal",
+                10,
+                3
+              ],
+              "foreground",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            [
+              [
+                "choose",
+                [
+                  "car_horn",
+                  "siren"
+                ]
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "uniform",
+                0,
+                9
+              ],
+              [
+                "truncnorm",
+                3,
+                1,
+                0.5,
+                5
+              ],
+              [
+                "normal",
+                10,
+                3
+              ],
+              "foreground",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            [
+              [
+                "const",
+                "human_voice"
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "uniform",
+                0,
+                9
+              ],
+              [
+                "truncnorm",
+                3,
+                1,
+                0.5,
+                5
+              ],
+              [
+                "normal",
+                10,
+                3
+              ],
+              "foreground",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            [
+              [
+                "const",
+                "human_voice"
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "uniform",
+                0,
+                9
+              ],
+              [
+                "truncnorm",
+                3,
+                1,
+                0.5,
+                5
+              ],
+              [
+                "normal",
+                10,
+                3
+              ],
+              "foreground",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          ],
+          "bg_spec": [
+            [
+              [
+                "const",
+                "park"
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "const",
+                10.0
+              ],
+              [
+                "const",
+                0
+              ],
+              "background",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            [
+              [
+                "const",
+                "park"
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "const",
+                10.0
+              ],
+              [
+                "const",
+                0
+              ],
+              "background",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          ],
+          "fg_labels": [
+            "car_horn",
+            "human_voice",
+            "siren"
+          ],
+          "bg_labels": [
+            "park",
+            "restaurant",
+            "street"
+          ],
+          "protected_labels": [],
+          "sr": 44100,
+          "ref_db": -20,
+          "n_channels": 1,
+          "fade_in_len": 0.01,
+          "fade_out_len": 0.01,
+          "n_events": 8,
+          "polyphony_max": 3,
+          "polyphony_gini": 0.5706043213616377,
+          "allow_repeated_label": true,
+          "allow_repeated_source": true,
+          "reverb": 0.1,
+          "scaper_version": "1.6.5",
+          "soundscape_audio_path": "soundscape.wav",
+          "isolated_events_audio_path": [],
+          "audio_path": "soundscape.wav",
+          "jams_path": "soundscape.jams",
+          "fix_clipping": false,
+          "peak_normalization": false,
+          "save_isolated_events": false,
+          "isolated_events_path": null,
+          "disable_sox_warnings": true,
+          "no_audio": false,
+          "txt_path": "soundscape.txt",
+          "txt_sep": "\t",
+          "disable_instantiation_warnings": false,
+          "peak_normalization_scale_factor": 1.0,
+          "ref_db_change": 0,
+          "ref_db_generated": -20,
+          "save_isolated_positions": false,
+          "isolated_positions_path": null,
+          "quick_pitch_time": false
+        }
+      },
+      "time": 0,
+      "duration": 10.0
+    }
+  ],
+  "file_metadata": {
+    "title": "",
+    "artist": "",
+    "release": "",
+    "duration": 10.0,
+    "identifiers": {},
+    "jams_version": "0.3.5"
+  },
+  "sandbox": {}
+}

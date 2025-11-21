@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dscaper"
+dynamic = ["version"]
+description = "A library for soundscape synthesis and augmentation"
+readme = "README.md"
+license = { text = "BSD-3-Clause" }
+authors = [
+  { name = "Justin Salamon", email = "justin.salamon@gmail.com" },
+  { name = "Duncan MacConnell" },
+  { name = "David Grünert", email = "grud@zhaw.ch" }
+]
+keywords = ["audio", "sound", "soundscape", "environmental", "dsp", "mixing"]
+classifiers = [
+  "License :: OSI Approved :: BSD License",
+  "Programming Language :: Python",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Topic :: Multimedia :: Sound/Audio :: Analysis",
+  "Topic :: Multimedia :: Sound/Audio :: Sound Synthesis",
+  "Programming Language :: Python :: 3.12"
+]
+requires-python = ">=3.8"
+# Note: 'sox' refers to the Python package providing bindings; if system binary is required, document separately.
+dependencies = [
+  "sox",
+  "soundfile",
+  "scipy",
+  "fastapi",
+  "jams",
+  "pyloudnorm"
+]
+
+[project.urls]
+Homepage = "https://github.com/dscaper/dscaper"
+Repository = "https://github.com/dscaper/dscaper"
+Issues = "https://github.com/dscaper/dscaper/issues"
+
+[project.optional-dependencies]
+docs = [
+  "sphinx",
+  "sphinx_rtd_theme",
+  "sphinx_issues"
+]
+tests = [
+  "backports.tempfile",
+  "pytest",
+  "pytest-cov",
+  "tqdm"
+]
+
+[tool.setuptools]
+# If you later add subpackages, adjust find options below.
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dscaper"]
+exclude = ["tests*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "dscaper.version.version" }

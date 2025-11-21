@@ -1,14 +1,13 @@
 # CREATED: 5/5/17 14:36 by Justin Salamon <justin.salamon@nyu.edu>
 
-from scaper.audio import get_integrated_lufs, match_sample_length
-from scaper.audio import peak_normalize
-from scaper.util import _close_temp_files
+from dscaper.audio import get_integrated_lufs, match_sample_length
+from dscaper.audio import peak_normalize
+from dscaper.util import _close_temp_files
 import numpy as np
 import scipy.signal as sg
 import os
 import pytest
-from scaper.scaper_exceptions import ScaperError
-from pkg_resources import resource_filename
+from dscaper.scaper_exceptions import ScaperError
 import shutil
 import soundfile as sf
 import tempfile
