@@ -8,7 +8,6 @@ import scipy.signal as sg
 import os
 import pytest
 from scaper.scaper_exceptions import ScaperError
-from pkg_resources import resource_filename
 import shutil
 import soundfile as sf
 import tempfile
