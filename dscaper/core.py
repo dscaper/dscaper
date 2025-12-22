@@ -2284,9 +2284,14 @@ class Scaper(object):
                 warnings.warn(
                     "No events to synthesize (silent soundscape), no audio "
                     "generated.", ScaperWarning)
-            else:                        
+            else:
+                # Get the minimum length of all event audios. there might
+                # be small differences due to rounding when converting from
+                # seconds to samples.
+                min_length = min([ea.shape[0] for ea in event_audio_list])
 
-                # Sum all events to get soundscape audio
+                # Sum all events within min_length to get soundscape audio 
+                event_audio_list = [ea[:min_length] for ea in event_audio_list]
                 soundscape_audio = sum(event_audio_list)
 
                 # Check for clipping and fix [optional]
