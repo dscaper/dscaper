@@ -133,6 +133,48 @@ class Dscaper:
             return DscaperApiResponse(status="error", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, content="Unsupported audio file format")
         
 
+    def get_label_metadata(self, library: str, label: str) -> DscaperJsonResponse:
+        """
+        Read audio metadata file.
+        
+        :param library: The library of the audio file.
+        :param label: The label of the audio file.
+        :return: A list of DscaperAudio objects containing the audio's metadata.
+        Exceptions:
+            - 404: If the metadata file does not exist.
+        """
+        metadata_path = os.path.join(self.library_basedir, library, label)
+        if not os.path.exists(metadata_path):
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND, content=json.dumps({"description": "Library or label not found"}))
+        metadata_list = []
+        for file in os.listdir(metadata_path):
+            # skip json files
+            if not file.endswith(".json"):
+                file_metadata = self.get_file_metadata(library, label, file)
+                metadata_list.append(file_metadata.content)
+        return DscaperJsonResponse(content=json.dumps(metadata_list))
+    
+
+    def get_file_metadata(self, library: str, label: str, filename: str) -> DscaperJsonResponse:
+        """
+        Read audio metadata file.
+        
+        :param library: The library of the audio file.
+        :param label: The label of the audio file.
+        :param filename: The name of the audio file.
+        :return: A DscaperAudio object containing the audio's metadata.
+        Exceptions:
+            - 404: If the metadata file does not exist.
+        """
+        base, ext = os.path.splitext(filename)
+        metadata_file = os.path.join(self.library_basedir, library, label, base + ".json")
+        if not os.path.exists(metadata_file):
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND, content=json.dumps({"description": "Metadata file not found"}))
+        with open(metadata_file, "r") as f:
+            metadata_json = f.read()
+        return DscaperJsonResponse(content=DscaperAudio.model_validate_json(metadata_json).model_dump_json())
+        
+    
     def get_libraries(self) -> DscaperJsonResponse:
         """
         Get a list of all audio libraries.

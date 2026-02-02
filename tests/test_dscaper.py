@@ -158,6 +158,87 @@ def test_get_filenames(temp_lib_base):
     assert "17-CAR-Rolls-Royce-Horn.wav" in filenames
     assert "17-CAR-Rolls-Royce-Horn.json" in filenames
 
+def test_get_file_metadata(temp_lib_base):
+    d = Dscaper(dscaper_base_path=temp_lib_base)
+    # Create and store an audio file
+    audio_file = os.path.join(os.getcwd(), "tests", "data", "library_inputs", "valid_audio.wav")
+    metadata = DscaperAudio(
+        library="test_lib",
+        label="test_label",
+        filename="test_audio.wav"
+    )
+    resp = d.store_audio(audio_file, metadata)
+    assert resp.status == "success"
+    # Test getting metadata for existing file
+    resp = d.get_file_metadata("test_lib", "test_label", "test_audio.wav")
+    assert resp.status == "success"
+    file_metadata = DscaperAudio.model_validate_json(json.dumps(resp.content))
+    assert isinstance(file_metadata, DscaperAudio)
+    assert file_metadata.library == "test_lib"
+    assert file_metadata.label == "test_label"
+    assert file_metadata.filename == "test_audio.wav"
+    assert file_metadata.id is not None
+    assert file_metadata.timestamp > 0
+    assert file_metadata.duration > 0
+    # Test getting metadata for non-existing file
+    resp2 = d.get_file_metadata("test_lib", "test_label", "non_existing.wav")
+    assert resp2.status == "error"
+    assert resp2.status_code == 404
+    # Test getting metadata for non-existing library/label
+    resp3 = d.get_file_metadata("non_existing_lib", "non_existing_label", "test_audio.wav")
+    assert resp3.status == "error"
+    assert resp3.status_code == 404
+
+def test_get_label_metadata(temp_lib_base):
+    d = Dscaper(dscaper_base_path=temp_lib_base)
+    # Create and store multiple audio files in the same label
+    audio_file = os.path.join(os.getcwd(), "tests", "data", "library_inputs", "valid_audio.wav")
+    metadata1 = DscaperAudio(
+        library="metadata_lib",
+        label="metadata_label",
+        filename="audio1.wav"
+    )
+    resp = d.store_audio(audio_file, metadata1)
+    assert resp.status == "success"
+    metadata2 = DscaperAudio(
+        library="metadata_lib",
+        label="metadata_label",
+        filename="audio2.wav"
+    )
+    resp = d.store_audio(audio_file, metadata2)
+    assert resp.status == "success"
+    metadata3 = DscaperAudio(
+        library="metadata_lib",
+        label="metadata_label",
+        filename="audio3.wav"
+    )
+    resp = d.store_audio(audio_file, metadata3)
+    assert resp.status == "success"
+    # Test getting metadata for existing label
+    resp = d.get_label_metadata("metadata_lib", "metadata_label")
+    assert resp.status == "success"
+    label_metadata_list = resp.content
+    assert isinstance(label_metadata_list, list)
+    assert len(label_metadata_list) == 3
+    # Verify each metadata entry
+    filenames = []
+    for metadata_json in label_metadata_list:
+        metadata_obj = DscaperAudio.model_validate_json(json.dumps(metadata_json))
+        assert isinstance(metadata_obj, DscaperAudio)
+        assert metadata_obj.library == "metadata_lib"
+        assert metadata_obj.label == "metadata_label"
+        assert metadata_obj.id is not None
+        assert metadata_obj.timestamp > 0
+        filenames.append(metadata_obj.filename)
+    # Check all filenames are present
+    assert "audio1.wav" in filenames
+    assert "audio2.wav" in filenames
+    assert "audio3.wav" in filenames
+    # Test getting metadata for non-existing library/label
+    resp2 = d.get_label_metadata("non_existing_lib", "non_existing_label")
+    assert resp2.status == "error"
+    assert resp2.status_code == 404
+
 def test_create_timeline_and_list_timelines(temp_lib_base):
     d = Dscaper(dscaper_base_path=temp_lib_base)
     props = DscaperTimeline(duration=10.0, description="desc", name="timeline1")
