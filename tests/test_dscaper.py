@@ -108,6 +108,19 @@ def test_store_audio_and_read_audio(temp_lib_base):
     resp6 = d2.read_audio("wrongtype", "mylabel", "audio.mp4")
     assert resp6.status == "error"
 
+def test_store_audio_forbidden_filename(temp_lib_base):
+    d = Dscaper(dscaper_base_path=temp_lib_base)
+    # Prepare dummy audio file (WAV header, not valid audio)
+    metadata = DscaperAudio(
+        library="lib1",
+        label="label1",
+        filename="label_metadata.wav"  # reserved filename
+    )
+    valid_file = os.path.join(os.getcwd(), "tests", "data", "library_inputs", "valid_audio.wav")
+    resp = d.store_audio(valid_file, metadata)
+    assert resp.status == "error"
+    assert resp.status_code == 400
+
 def test_get_libraries(temp_lib_base):
     test_lib_path = os.path.join(os.getcwd(), "tests", "data")
     d = Dscaper(dscaper_base_path=test_lib_path)
@@ -189,6 +202,8 @@ def test_get_file_metadata(temp_lib_base):
     assert resp3.status == "error"
     assert resp3.status_code == 404
 
+
+
 def test_get_label_metadata(temp_lib_base):
     d = Dscaper(dscaper_base_path=temp_lib_base)
     # Create and store multiple audio files in the same label
@@ -214,26 +229,84 @@ def test_get_label_metadata(temp_lib_base):
     )
     resp = d.store_audio(audio_file, metadata3)
     assert resp.status == "success"
-    # Test getting metadata for existing label
+    # Test getting metadata for existing label with default metadata values
     resp = d.get_label_metadata("metadata_lib", "metadata_label")
     assert resp.status == "success"
-    label_metadata_list = resp.content
-    assert isinstance(label_metadata_list, list)
-    assert len(label_metadata_list) == 3
+    label_metadata = DscaperLabel.model_validate_json(json.dumps(resp.content))
+    assert isinstance(label_metadata, DscaperLabel)
+    audio_metadata_list = label_metadata.audios
+    assert isinstance(audio_metadata_list, list)
+    assert len(audio_metadata_list) == 3
     # Verify each metadata entry
     filenames = []
-    for metadata_json in label_metadata_list:
-        metadata_obj = DscaperAudio.model_validate_json(json.dumps(metadata_json))
-        assert isinstance(metadata_obj, DscaperAudio)
-        assert metadata_obj.library == "metadata_lib"
-        assert metadata_obj.label == "metadata_label"
-        assert metadata_obj.id is not None
-        assert metadata_obj.timestamp > 0
-        filenames.append(metadata_obj.filename)
+    for audio_metadata in audio_metadata_list:
+        assert isinstance(audio_metadata, DscaperAudio)
+        assert audio_metadata.library == "metadata_lib"
+        assert audio_metadata.label == "metadata_label"
+        assert audio_metadata.id is not None
+        assert audio_metadata.timestamp > 0
+        filenames.append(audio_metadata.filename)
     # Check all filenames are present
     assert "audio1.wav" in filenames
     assert "audio2.wav" in filenames
     assert "audio3.wav" in filenames
+    # Now set label metadata
+    label_sandbox = json.dumps({"info": "test_sandbox"})
+    label_metadata_to_set = DscaperLabel(
+        library="metadata_lib",
+        label="metadata_label",
+        description="Test label description",
+        sandbox=label_sandbox
+    )
+    resp_set = d.store_label_metadata(label_metadata_to_set)
+    assert resp_set.status == "success"
+    # Test getting metadata for existing label after setting metadata
+    resp = d.get_label_metadata("metadata_lib", "metadata_label")
+    assert resp.status == "success"
+    label_metadata = DscaperLabel.model_validate_json(json.dumps(resp.content))
+    assert isinstance(label_metadata, DscaperLabel)
+    assert label_metadata.description == "Test label description"
+    assert label_metadata.sandbox == label_sandbox
+    # Test updating label metadata
+    label_metadata_to_set.description = "Updated description"
+    resp_update = d.store_label_metadata(label_metadata_to_set)
+    assert resp_update.status == "success"
+    # Test getting metadata for existing label after updating metadata
+    resp = d.get_label_metadata("metadata_lib", "metadata_label")
+    assert resp.status == "success"
+    label_metadata = DscaperLabel.model_validate_json(json.dumps(resp.content))
+    assert isinstance(label_metadata, DscaperLabel)
+    assert label_metadata.description == "Updated description"
+    # Test setting metadata for non-existing library/label (should create it)
+    new_label_metadata = DscaperLabel(
+        library="new_lib",
+        label="new_label",
+        description="New label description"
+    )
+    resp_set_new = d.store_label_metadata(new_label_metadata)
+    assert resp_set_new.status == "success"
+    # Test getting metadata for the newly created label
+    resp = d.get_label_metadata("new_lib", "new_label")
+    assert resp.status == "success"
+    label_metadata = DscaperLabel.model_validate_json(json.dumps(resp.content))
+    assert isinstance(label_metadata, DscaperLabel)
+    assert label_metadata.description == "New label description"
+    assert isinstance(label_metadata.audios, list)
+    assert len(label_metadata.audios) == 0
+    # Test getting metadata without audio files
+    resp_no_audios = d.get_label_metadata("metadata_lib", "metadata_label", include_audios=False)
+    assert resp_no_audios.status == "success"
+    label_metadata_no_audios = DscaperLabel.model_validate_json(json.dumps(resp_no_audios.content))
+    assert isinstance(label_metadata_no_audios, DscaperLabel)
+    assert len(label_metadata_no_audios.audios) == 0
+    # Test setting metadata with invalid data (missing library)
+    invalid_label_metadata = DscaperLabel(
+        library="",  # valid library
+        label="",  # missing label
+        description="Invalid label"
+    )
+    resp_invalid = d.store_label_metadata(invalid_label_metadata)
+    assert resp_invalid.status == "error"
     # Test getting metadata for non-existing library/label
     resp2 = d.get_label_metadata("non_existing_lib", "non_existing_label")
     assert resp2.status == "error"

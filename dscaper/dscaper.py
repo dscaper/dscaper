@@ -35,7 +35,6 @@ class Dscaper:
         self.library_basedir = os.path.join(self.dscaper_base_path, "libraries")
         if not os.path.exists(self.library_basedir):
             os.makedirs(self.library_basedir)
-    
 
     def get_dscaper_base_path(self) -> str:        
         """
@@ -43,7 +42,6 @@ class Dscaper:
         :return: The base path for the libraries.
         """        
         return self.dscaper_base_path
-    
 
     def store_audio(self, file: Union[Annotated[bytes, File()], str], metadata: DscaperAudio, update: bool = False) -> DscaperJsonResponse:
         """
@@ -74,6 +72,9 @@ class Dscaper:
         audio_destination = os.path.join(file_path, m.filename)
         base, ext = os.path.splitext(m.filename)
         metadata_destination = os.path.join(file_path, base + ".json")
+        # check if the file name is not label_metadata (which is reserved for label metadata)
+        if base == "label_metadata":
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST, content=json.dumps({"description": "Filename 'label_metadata' is reserved for label metadata"}))
         # check if the file already exists
         if os.path.exists(audio_destination) and not update:
             return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST, content=json.dumps({"description": "File already exists. Use PUT to update it."}))
@@ -133,26 +134,38 @@ class Dscaper:
             return DscaperApiResponse(status="error", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, content="Unsupported audio file format")
         
 
-    def get_label_metadata(self, library: str, label: str) -> DscaperJsonResponse:
+    def get_label_metadata(self, library: str, label: str, include_audios: bool = True) -> DscaperJsonResponse:
         """
-        Read audio metadata file.
+        Read label metadata.
         
-        :param library: The library of the audio file.
-        :param label: The label of the audio file.
-        :return: A list of DscaperAudio objects containing the audio's metadata.
+        :param library: The library that contains the label.
+        :param label: The label to read metadata from.
+        :return: A DscaperLabel object containing the label's metadata.
         Exceptions:
-            - 404: If the metadata file does not exist.
+            - 404: If the label directory does not exist.
         """
-        metadata_path = os.path.join(self.library_basedir, library, label)
-        if not os.path.exists(metadata_path):
+        label_path = os.path.join(self.library_basedir, library, label)
+        if not os.path.exists(label_path):
             return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND, content=json.dumps({"description": "Library or label not found"}))
-        metadata_list = []
-        for file in os.listdir(metadata_path):
-            # skip json files
-            if not file.endswith(".json"):
-                file_metadata = self.get_file_metadata(library, label, file)
-                metadata_list.append(file_metadata.content)
-        return DscaperJsonResponse(content=json.dumps(metadata_list))
+        #  check if label metadata file exists (otherwise create a default label metadata)
+        metadata_file = os.path.join(label_path, "label_metadata.json")
+        if os.path.exists(metadata_file):
+            with open(metadata_file, "r") as f:
+                metadata_json = f.read()
+            label_metadata = DscaperLabel.model_validate_json(metadata_json)
+        else:
+            label_metadata = DscaperLabel(library=library, label=label)
+        # collect audio metadata for all audio files in the label
+        audios = []
+        if include_audios:
+            for file in os.listdir(label_path):
+                if file.endswith(".json") and file != "label_metadata.json":
+                    with open(os.path.join(label_path, file), "r") as f:
+                        metadata_json = f.read()
+                    audio_metadata = DscaperAudio.model_validate_json(metadata_json)
+                    audios.append(audio_metadata)
+            label_metadata.audios = audios
+        return DscaperJsonResponse(content=label_metadata.model_dump_json())
     
 
     def get_file_metadata(self, library: str, label: str, filename: str) -> DscaperJsonResponse:
@@ -226,6 +239,32 @@ class Dscaper:
         return DscaperJsonResponse(content=json.dumps(labels))
 
 
+    def store_label_metadata(self, metadata: DscaperLabel) -> DscaperJsonResponse:
+        """
+        Set metadata for a specific audio label.
+        
+        :param metadata: Metadata for the audio label.
+        :return: A DscaperLabel object containing the updated label's metadata.
+        Exceptions:
+            - 400: If library or label is not specified.
+        """
+        # check that library and label are specified
+        if not metadata.library or not metadata.label:
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST, content=json.dumps({"description": "Library and label must be specified"}))
+        label_path = os.path.join(self.library_basedir, metadata.library, metadata.label)
+        if not os.path.exists(label_path):
+            # create the directory if it does not exist
+            os.makedirs(label_path)
+        # remove audios field from metadata before saving. It wll be set when reading the metadata
+        metadata.audios = []
+        # save the metadata to a JSON file (overwrite if it exists)
+        metadata_file = os.path.join(label_path, "label_metadata.json")
+        with open(metadata_file, "w") as f:
+            f.write(metadata.model_dump_json())
+        read_metadata_response = self.get_label_metadata(metadata.library, metadata.label)
+        return DscaperJsonResponse(status_code=status.HTTP_200_OK, content=read_metadata_response.model_dump_json())    
+    
+    
     def create_timeline(self, properties: DscaperTimeline) -> DscaperJsonResponse:
         """Create a new timeline.
         

@@ -240,7 +240,8 @@ Here is a complete list of the methods available in the `Dscaper` class. Most me
 | `get_libraries()` | List all available audio libraries. Returns a `DscaperJsonResponse`. Content is a list of strings. |
 | `get_filenames(library, label)` | List all filenames within a specific library and label. Returns a `DscaperJsonResponse`. Content is a list of strings.|
 | `get_labels(library)` | List all labels within a specific library. Returns a `DscaperJsonResponse`. Content is a list of strings. |
-| `get_label_metadata(library, label)` | Retrieve all metadata entries for a specific label in a library. Returns a `DscaperJsonResponse`. Content is a list of `DscaperAudio` metadata entries. |
+| `store_label_metadata(metadata)` | Store metadata for a specific label in a library. Returns a `DscaperJsonResponse`. Content is of type `DscaperLabel` and contains all data stored. |
+| `get_label_metadata(library, label)` | Retrieve the metadata for a specific label in a library. Returns a `DscaperJsonResponse`. Content is of type `DscaperLabel` and contains all data stored. With include_audios=True (Default) also metadata for all audio files under the label is included. |
 | `get_file_metadata(library, label, filename)` | Retrieve metadata for a specific audio file in a library. Returns a `DscaperJsonResponse`. Content is of type `DscaperAudio` and contains all data stored. |
 | `list_timelines()` | List all timelines and their metadata. Returns a `DscaperJsonResponse`. Content is of type `DscaperTimelines`. |
 | `list_backgrounds(timeline_name)` | List all backgrounds in a specified timeline. Returns a `DscaperJsonResponse`. Content is of type `DscaperBackgrounds`. |
