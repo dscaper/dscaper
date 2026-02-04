@@ -355,6 +355,18 @@ class Dscaper:
         # Create the event object
         event_id = str(uuid.uuid4())
         properties.id = event_id
+        # If event_duration is not set, use duration of the audio file if given or default to 5 seconds
+        if properties.event_duration is None:
+            properties.event_duration = ['const', '5']
+            if properties.source_file and properties.source_file[0] == 'const':
+                source_file_path = os.path.join(self.library_basedir, properties.library, properties.label[1], properties.source_file[1])
+                if os.path.isfile(source_file_path):
+                    duration = soundfile.info(source_file_path).duration
+                    properties.event_duration = ['const', str(duration)]
+        # compute event end time if event_time and event_duration are constant
+        if properties.event_time[0] == 'const' and properties.event_duration[0] == 'const':
+            event_end = float(properties.event_time[1]) + float(properties.event_duration[1])
+            properties.event_end = event_end
         # Save the event to a JSON file
         event_file = os.path.join(events_path, f"{event_id}.json")
         with open(event_file, "w") as f:

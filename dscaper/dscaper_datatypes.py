@@ -60,6 +60,8 @@ class DscaperEvent(BaseModel):
     speaker: Optional[str] = None
     text: Optional[str] = None
     id: Optional[str] = None  # set by the server
+    preceding_event: Optional[str] = None  # id of the preceding event
+    event_end: Optional[float] = None  # set by the server
 
 
 class DscaperEvents(BaseModel):
