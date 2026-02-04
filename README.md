@@ -71,10 +71,16 @@ On windows you can use the provided installation binaries:
 
 ### Installing dScaper
 
-To install the latest version of dScaper from source, clone or pull the lastest version:
+You can install dScaper using pip:
 
 ```
-git clone https://github.com/cyrta/dscaper
+pip install dscaper
+```
+
+To install dScaper from source, clone or pull the lastest version:
+
+```
+git clone https://github.com/dscaper/dscaper
 ```
 
 Then create an environment and install the package from requirements.txt:
