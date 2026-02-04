@@ -13,3 +13,4 @@ scaper/bin/*
 .venv/*
 data/libraries/*
 data/timelines/*
+*-info
