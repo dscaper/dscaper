@@ -1,6 +1,6 @@
 # dScaper
 
-![dScaper logo](/docs/dScaper-logo.png)
+![dScaper logo](https://raw.githubusercontent.com/dscaper/dscaper/refs/heads/master/docs/dScaper-logo.png)
 
 ***A [Scaper](https://github.com/justinsalamon/scaper) fork optimized for audio generation pipelines.*** 
 
@@ -31,7 +31,7 @@ alternative API for accessing Scaper that is optimized for the usage in pipeline
 
 dScaper can eighter be use as python module or as separate server. In both variants, dScaper not only handles timeline generation, but it also stores and manages audio files.
 
-![architecture overview](docs/dscaper_architecture.drawio.svg)
+![architecture overview](https://raw.githubusercontent.com/dscaper/dscaper/refs/heads/master/docs/dscaper_architecture.drawio.svg)
 
 The main features of dScaper are:
 - **Audio library management**: dScaper allows you to store and manage audio files in a structured way. Audio files are organized into libraries and labels, making it easy to retrieve and use them in multiple timelines.
