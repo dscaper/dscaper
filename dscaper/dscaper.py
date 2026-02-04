@@ -7,7 +7,20 @@ import dscaper
 import zipfile
 import soundfile
 from fastapi import File, status
-from dscaper.dscaper_datatypes import *
+from dscaper.dscaper_datatypes import (
+    DscaperAudio,
+    DscaperTimeline,
+    DscaperBackground,
+    DscaperEvent,
+    DscaperGenerate,
+    DscaperLabel,
+    DscaperTimelines,
+    DscaperBackgrounds,
+    DscaperEvents,
+    DscaperGenerations,
+    DscaperJsonResponse,
+    DscaperApiResponse
+)
 from typing import Annotated, Optional, Union
 
 
@@ -36,17 +49,16 @@ class Dscaper:
         if not os.path.exists(self.library_basedir):
             os.makedirs(self.library_basedir)
 
-    def get_dscaper_base_path(self) -> str:        
+    def get_dscaper_base_path(self) -> str:
         """
         Returns the base path for the libraries.
         :return: The base path for the libraries.
-        """        
+        """
         return self.dscaper_base_path
 
     def store_audio(self, file: Union[Annotated[bytes, File()], str], metadata: DscaperAudio, update: bool = False) -> DscaperJsonResponse:
         """
         Store audio file and its metadata.
-        
         :param file: The audio file to be stored or a file path.
         :param metadata: Metadata for the audio file.
         :param update: If True, update the existing file, otherwise return an error if the file already exists.
@@ -61,12 +73,14 @@ class Dscaper:
         # if file is a path, read the file
         if isinstance(file, str):
             if not os.path.exists(file):
-                return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND, content=json.dumps({"description": "File not found"}))
+                return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND,
+                                           content=json.dumps({"description": "File not found"}))
             with open(file, "rb") as f:
                 file = f.read()
         # check if file is empty
         if len(file) == 0:
-            return DscaperJsonResponse(status="error",status_code=status.HTTP_400_BAD_REQUEST,content=json.dumps({"description": "File is empty"}))
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST,
+                                       content=json.dumps({"description": "File is empty"}))
         # filename and path
         file_path = os.path.join(self.library_basedir, m.library, m.label)
         audio_destination = os.path.join(file_path, m.filename)
@@ -74,12 +88,15 @@ class Dscaper:
         metadata_destination = os.path.join(file_path, base + ".json")
         # check if the file name is not label_metadata (which is reserved for label metadata)
         if base == "label_metadata":
-            return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST, content=json.dumps({"description": "Filename 'label_metadata' is reserved for label metadata"}))
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST,
+                                       content=json.dumps({"description": "Filename 'label_metadata' is reserved for label metadata"}))
         # check if the file already exists
         if os.path.exists(audio_destination) and not update:
-            return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST, content=json.dumps({"description": "File already exists. Use PUT to update it."}))
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST,
+                                       content=json.dumps({"description": "File already exists. Use PUT to update it."}))
         elif not os.path.exists(audio_destination) and update:
-            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND, content=json.dumps({"description": "File does not exist. Use POST to create it."}))
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND,
+                                       content=json.dumps({"description": "File does not exist. Use POST to create it."}))
         # create the directory if it does not exist
         os.makedirs(file_path, exist_ok=True)
         # save the file to the audio path
@@ -91,23 +108,22 @@ class Dscaper:
         except RuntimeError as e:
             # delete the file if it is not valid
             os.remove(audio_destination)
-            return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST, content=json.dumps({"description": f"Invalid audio file: {str(e)}"}))
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST,
+                                       content=json.dumps({"description": f"Invalid audio file: {str(e)}"}))
         # create the metadata object
         file_id = str(uuid.uuid4())
         timestamp = int(time.time())
-        metadata_obj = DscaperAudio(id=file_id, library=m.library, label=m.label, filename=m.filename,  
-                                sandbox=m.sandbox, timestamp=timestamp, duration=duration)
+        metadata_obj = DscaperAudio(id=file_id, library=m.library, label=m.label, filename=m.filename,
+                                    sandbox=m.sandbox, timestamp=timestamp, duration=duration)
         # save the metadata to the audio metadata path
         with open(metadata_destination, "w") as f:
             f.write(metadata_obj.model_dump_json())
         # return the metadata object
         return DscaperJsonResponse(status_code=status.HTTP_200_OK, content=metadata_obj.model_dump_json())
 
-
     def read_audio(self, library: str, label: str, filename: str) -> DscaperApiResponse:
         """
         Read audio file (metadata or audio)
-        
         :param library: The library of the audio file.
         :param label: The label of the audio file.
         :param filename: The name of the audio file.
@@ -124,7 +140,8 @@ class Dscaper:
         if ext.lower() == ".json":
             with open(file, "r") as f:
                 metadata_json = f.read()
-            return DscaperApiResponse(status="success", status_code=status.HTTP_200_OK, content=DscaperAudio.model_validate_json(metadata_json).model_dump_json(), media_type="application/json")
+            return DscaperApiResponse(status="success", status_code=status.HTTP_200_OK,
+                                      content=DscaperAudio.model_validate_json(metadata_json).model_dump_json(), media_type="application/json")
         # requesting audio file
         elif ext.lower() in [".wav", ".mp3", ".flac", ".ogg"]:
             with open(file, "rb") as f:
@@ -132,12 +149,10 @@ class Dscaper:
             return DscaperApiResponse(status="success", status_code=status.HTTP_200_OK, content=audio_data, media_type="audio/" + ext[1:])
         else:
             return DscaperApiResponse(status="error", status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, content="Unsupported audio file format")
-        
 
     def get_label_metadata(self, library: str, label: str, include_audios: bool = True) -> DscaperJsonResponse:
         """
         Read label metadata.
-        
         :param library: The library that contains the label.
         :param label: The label to read metadata from.
         :return: A DscaperLabel object containing the label's metadata.
@@ -146,7 +161,8 @@ class Dscaper:
         """
         label_path = os.path.join(self.library_basedir, library, label)
         if not os.path.exists(label_path):
-            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND, content=json.dumps({"description": "Library or label not found"}))
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND,
+                                       content=json.dumps({"description": "Library or label not found"}))
         #  check if label metadata file exists (otherwise create a default label metadata)
         metadata_file = os.path.join(label_path, "label_metadata.json")
         if os.path.exists(metadata_file):
@@ -166,12 +182,10 @@ class Dscaper:
                     audios.append(audio_metadata)
             label_metadata.audios = audios
         return DscaperJsonResponse(content=label_metadata.model_dump_json())
-    
 
     def get_file_metadata(self, library: str, label: str, filename: str) -> DscaperJsonResponse:
         """
         Read audio metadata file.
-        
         :param library: The library of the audio file.
         :param label: The label of the audio file.
         :param filename: The name of the audio file.
@@ -182,16 +196,15 @@ class Dscaper:
         base, ext = os.path.splitext(filename)
         metadata_file = os.path.join(self.library_basedir, library, label, base + ".json")
         if not os.path.exists(metadata_file):
-            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND, content=json.dumps({"description": "Metadata file not found"}))
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND,
+                                       content=json.dumps({"description": "Metadata file not found"}))
         with open(metadata_file, "r") as f:
             metadata_json = f.read()
         return DscaperJsonResponse(content=DscaperAudio.model_validate_json(metadata_json).model_dump_json())
-        
-    
+
     def get_libraries(self) -> DscaperJsonResponse:
         """
         Get a list of all audio libraries.
-        
         :return: A list of library names.
         """
         libraries = []
@@ -200,11 +213,9 @@ class Dscaper:
                 libraries.extend(dirs)
         return DscaperJsonResponse(content=json.dumps(libraries))
 
-
     def get_filenames(self, library: str, label: str) -> DscaperJsonResponse:
         """
         Get a list of all filenames in a specific audio label.
-        
         :param library: The library to get filenames from.
         :param label: The label to get filenames from.
         :return: A list of filenames in the specified label.
@@ -213,36 +224,34 @@ class Dscaper:
         """
         library_path = os.path.join(self.library_basedir, library, label)
         if not os.path.exists(library_path):
-            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND, content=json.dumps({"description": "Library not found"}))
-        
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND,
+                                       content=json.dumps({"description": "Library not found"}))
+
         filenames = []
         for file in os.listdir(library_path):
             if os.path.isfile(os.path.join(library_path, file)):
                 filenames.append(file)
         return DscaperJsonResponse(content=json.dumps(filenames))
 
-
     def get_labels(self, library: str) -> DscaperJsonResponse:
         """
         Get a list of all labels in a specific audio library.
-        
         :param library: The library to get labels from.
         :return: A list of label names in the specified library.
         """
         library_path = os.path.join(self.library_basedir, library)
         if not os.path.exists(library_path):
-            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND, content=json.dumps({"description": "Library not found"}))    
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND,
+                                       content=json.dumps({"description": "Library not found"}))
         labels = []
         for root, dirs, files in os.walk(library_path):
             if root == library_path:
                 labels.extend(dirs)
         return DscaperJsonResponse(content=json.dumps(labels))
 
-
     def store_label_metadata(self, metadata: DscaperLabel) -> DscaperJsonResponse:
         """
         Set metadata for a specific audio label.
-        
         :param metadata: Metadata for the audio label.
         :return: A DscaperLabel object containing the updated label's metadata.
         Exceptions:
@@ -250,7 +259,8 @@ class Dscaper:
         """
         # check that library and label are specified
         if not metadata.library or not metadata.label:
-            return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST, content=json.dumps({"description": "Library and label must be specified"}))
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST,
+                                       content=json.dumps({"description": "Library and label must be specified"}))
         label_path = os.path.join(self.library_basedir, metadata.library, metadata.label)
         if not os.path.exists(label_path):
             # create the directory if it does not exist
@@ -262,12 +272,10 @@ class Dscaper:
         with open(metadata_file, "w") as f:
             f.write(metadata.model_dump_json())
         read_metadata_response = self.get_label_metadata(metadata.library, metadata.label)
-        return DscaperJsonResponse(status_code=status.HTTP_200_OK, content=read_metadata_response.model_dump_json())    
-    
-    
+        return DscaperJsonResponse(status_code=status.HTTP_200_OK, content=read_metadata_response.model_dump_json())
+
     def create_timeline(self, properties: DscaperTimeline) -> DscaperJsonResponse:
         """Create a new timeline.
-        
         :param name: The name of the timeline.
         :param properties: Properties for the timeline.
         :return: A Timeline object containing the created timeline's metadata.
@@ -279,7 +287,8 @@ class Dscaper:
         timeline_config = os.path.join(timeline_path, "timeline.json")
         # Check if the timeline already exists
         if os.path.exists(timeline_config):
-            return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST, content=json.dumps({"description": f"Timeline '{p.name}' already exists."}))
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST,
+                                       content=json.dumps({"description": f"Timeline '{p.name}' already exists."}))
         # Create the directory if it does not exist
         os.makedirs(timeline_path, exist_ok=True)
         # Create the Timeline object
@@ -297,12 +306,10 @@ class Dscaper:
         with open(timeline_config, "w") as f:
             f.write(timeline.model_dump_json())
         # Return the created timeline object
-        return DscaperJsonResponse(status_code=status.HTTP_201_CREATED,content=timeline.model_dump_json())
-        
+        return DscaperJsonResponse(status_code=status.HTTP_201_CREATED, content=timeline.model_dump_json())
 
     def add_background(self, name: str, properties: DscaperBackground) -> DscaperJsonResponse:
         """Add a background to the timeline.
-        
         :param name: The name of the timeline.
         :param properties: Properties for the background.
         :return: A DscaperBackground object containing the added background's metadata.
@@ -313,7 +320,8 @@ class Dscaper:
         timeline_config = os.path.join(timeline_path, "timeline.json")
         # Check if the timeline exists
         if not os.path.exists(timeline_config):
-            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND, content=json.dumps({"description": f"Timeline '{name}' does not exist."}))
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND,
+                                       content=json.dumps({"description": f"Timeline '{name}' does not exist."}))
         # Create the background directory if it does not exist
         background_path = os.path.join(timeline_path, "background")
         os.makedirs(background_path, exist_ok=True)
@@ -327,10 +335,8 @@ class Dscaper:
         # Return a response indicating success
         return DscaperJsonResponse(status_code=status.HTTP_201_CREATED, content=properties.model_dump_json())
 
-
     def add_event(self, name: str, properties: DscaperEvent) -> DscaperJsonResponse:
         """Add an event to the timeline.
-        
         :param name: The name of the timeline.
         :param properties: Properties for the event.
         :return: A DscaperEvent object containing the added event's metadata.
@@ -341,7 +347,8 @@ class Dscaper:
         timeline_config = os.path.join(timeline_path, "timeline.json")
         # Check if the timeline exists
         if not os.path.exists(timeline_config):
-            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND, content=json.dumps({"description": f"Timeline '{name}' does not exist."}))
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND,
+                                       content=json.dumps({"description": f"Timeline '{name}' does not exist."}))
         # Create the events directory if it does not exist
         events_path = os.path.join(timeline_path, "events")
         os.makedirs(events_path, exist_ok=True)
@@ -355,10 +362,8 @@ class Dscaper:
         # Return a response indicating success
         return DscaperJsonResponse(status_code=status.HTTP_201_CREATED, content=properties.model_dump_json())
 
-
     def generate_timeline(self, name: str, properties: DscaperGenerate) -> DscaperJsonResponse:
         """Generate the timeline.
-        
         :param name: The name of the timeline.
         :param properties: Properties for the generation.
         :return: A response indicating the timeline was generated.
@@ -369,7 +374,8 @@ class Dscaper:
         timeline_config = os.path.join(timeline_path, "timeline.json")
         # Check if the timeline exists
         if not os.path.exists(timeline_config):
-            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND, content=json.dumps({"description": f"Timeline '{name}' does not exist."}))
+            return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND,
+                                       content=json.dumps({"description": f"Timeline '{name}' does not exist."}))
         # Create the generate directory if it does not exist
         generate_base = os.path.join(timeline_path, "generate")
         os.makedirs(generate_base, exist_ok=True)
@@ -382,14 +388,18 @@ class Dscaper:
         os.makedirs(generate_dir, exist_ok=True)
         properties.id = generate_id
         properties.timestamp = int(time.time())
-        
+
         fg_path = os.path.join(timeline_path, "foreground")
         os.makedirs(fg_path, exist_ok=True)
-        
+
         bg_path = os.path.join(timeline_path, "background")
         os.makedirs(bg_path, exist_ok=True)
 
         # Use scaper to generate the timeline
+        adjust_timeline_duration = False
+        if timeline.duration <= 0:
+            adjust_timeline_duration = True
+            timeline.duration = 1.0  # default duration
         sc = dscaper.Scaper(
             duration=timeline.duration,
             fg_path=fg_path,  # fg_path is not used in this context
@@ -413,6 +423,7 @@ class Dscaper:
                         library=os.path.join(self.library_basedir, background.library) if background.library else None
                     )
         # check if events folder exists
+        last_event_end_time = 0.0
         if os.path.exists(os.path.join(timeline_path, "events")):
             # add events
             for event in os.listdir(os.path.join(timeline_path, "events")):
@@ -442,6 +453,14 @@ class Dscaper:
                         speaker=event_data.speaker,
                         text=event_data.text
                     )
+                    if event_data.event_time[0] == 'const' and event_data.source_file[0] == 'const':
+                        event_end = float(event_data.event_time[1]) + float(event_data.event_duration[1])
+                        if event_end > last_event_end_time:
+                            last_event_end_time = event_end
+
+        if adjust_timeline_duration:
+            sc.duration = last_event_end_time + 1.0  # add 1 second buffer
+
         # Generate the timeline
         audiofile = os.path.join(generate_dir, "soundscape.wav")
         jamsfile = os.path.join(generate_dir, "soundscape.jams")
@@ -457,9 +476,9 @@ class Dscaper:
             txt_path=txtfile,
             save_isolated_events=properties.save_isolated_events,
             save_isolated_positions=properties.save_isolated_positions,
-            disable_event_looping=False ,# allow event looping for generated timelines
-            disable_instantiation_warnings=properties.disable_instantiation_warnings, # disable warnings for generated timelines
-            fix_clipping=True # fix clipping for generated timelines
+            disable_event_looping=False,  # allow event looping for generated timelines
+            disable_instantiation_warnings=properties.disable_instantiation_warnings,  # disable warnings for generated timelines
+            fix_clipping=True  # fix clipping for generated timelines
         )
         # add the generated files in the properties (including subdirectories)
         properties.generated_files = []
@@ -479,10 +498,8 @@ class Dscaper:
             content=properties.model_dump_json(),
         )
 
-
     def list_timelines(self) -> DscaperJsonResponse:
         """List all timelines.
-
         :return: A list of timelines.
         """
         timelines = DscaperTimelines()
@@ -496,10 +513,8 @@ class Dscaper:
                             timelines.timelines.append(timeline)
         return DscaperJsonResponse(content=timelines.model_dump_json())
 
-
     def list_backgrounds(self, timeline_name: str) -> DscaperJsonResponse:
         """List all backgrounds in the timeline.
-        
         :param timeline_name: The name of the timeline.
         :return: A list of backgrounds.
         Exceptions:
@@ -525,10 +540,8 @@ class Dscaper:
             content=backgrounds.model_dump_json(),
         )
 
-
     def list_events(self, timeline_name: str) -> DscaperJsonResponse:
         """List all events in the timeline.
-        
         :param timeline_name: The name of the timeline.
         :return: A list of events.
         Exceptions:
@@ -552,10 +565,8 @@ class Dscaper:
                     events.events.append(event)
         return DscaperJsonResponse(content=events.model_dump_json())
 
-
     def get_generated_timelines(self, timeline_name: str) -> DscaperJsonResponse:
         """Get the generated timeline.
-        
         :param timeline_name: The name of the timeline.
         :return: The generated timeline.
         Exceptions:
@@ -583,10 +594,8 @@ class Dscaper:
         # Return the list of generated timelines
         return DscaperJsonResponse(content=generated_timelines.model_dump_json())
 
-
     def get_generated_timeline_by_id(self, timeline_name: str, generate_id: str) -> DscaperJsonResponse:
         """Get a specific generated timeline by ID.
-        
         :param timeline_name: The name of the timeline.
         :param generate_id: The ID of the generated timeline.
         :return: The generated timeline properties.
@@ -613,10 +622,8 @@ class Dscaper:
             properties = DscaperGenerate.model_validate_json(f.read())
         return DscaperJsonResponse(content=properties.model_dump_json())
 
-
     def get_generated_file(self, timeline_name: str, generate_id: str, file_name: str) -> DscaperApiResponse:
         """Get a specific generated file from the timeline.
-        
         :param timeline_name: The name of the timeline.
         :param generate_id: The ID of the generated timeline.
         :param file_name: The name of the generated file.
@@ -679,10 +686,10 @@ class Dscaper:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content="Unsupported file format"
             )
-        
+
     def get_generated_files(self, timeline_name: str, generate_id: str) -> DscaperApiResponse:
         """Get all generated files from the timeline.
-        
+
         :param timeline_name: The name of the timeline.
         :param generate_id: The ID of the generated timeline.
         :return: A list of generated files or an error response if not found.
@@ -715,7 +722,6 @@ class Dscaper:
             media_type="application/zip"
         )
 
-
     # Helper functions to convert distributions
     # to tuples for scaper compatibility
 
@@ -746,7 +752,7 @@ class Dscaper:
             if len(distribution) != 2:
                 raise ValueError("Choose distribution must have exactly one list of values.")
             return (dist_type, self._string_to_list(distribution[1]))
-        elif dist_type == 'choose_weighted':    
+        elif dist_type == 'choose_weighted':
             if len(distribution) != 3:
                 raise ValueError("Choose weighted distribution must have exactly one list of values and one list of weights.")
             return (dist_type, self._string_to_list(distribution[1]), self._string_to_list(distribution[2]))
@@ -764,7 +770,7 @@ class Dscaper:
             return (dist_type, float(distribution[1]), float(distribution[2]))
         else:
             raise ValueError("Invalid distribution format. Must be a list or string.")
-        
+
     def _string_to_list(self, string):
         """Convert a string to a list."""
         if not isinstance(string, str):
@@ -774,7 +780,7 @@ class Dscaper:
         output_list = [s.strip() for s in string.split(',') if s.strip()]
         # print(f"*** Converting string to list: {string} to {output_list}")
         return output_list
-    
+
     def _isfloat(self, string):
         if not isinstance(string, str):
             return False

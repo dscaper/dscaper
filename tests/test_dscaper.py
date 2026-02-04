@@ -1,22 +1,25 @@
 import pytest
 
-from dscaper import dscaper
 from dscaper.dscaper import Dscaper
-from dscaper.dscaper_datatypes import *
+# from dscaper.dscaper_datatypes import *
 import os
 import tempfile
 import shutil
-import uuid
 import json
 import soundfile as sf
 from dscaper.dscaper_datatypes import (
-    DscaperApiResponse,
     DscaperAudio,
     DscaperTimeline,
     DscaperBackground,
     DscaperEvent,
     DscaperGenerate,
+    DscaperLabel,
+    DscaperTimelines,
+    DscaperBackgrounds,
+    DscaperEvents,
+    DscaperGenerations
 )
+
 
 @pytest.fixture
 def temp_lib_base():
@@ -25,23 +28,28 @@ def temp_lib_base():
     yield temp_dir
     shutil.rmtree(temp_dir)
 
+
 def test_init_creates_dirs(temp_lib_base):
-    d = Dscaper(dscaper_base_path=temp_lib_base)
+    Dscaper(dscaper_base_path=temp_lib_base)
     assert os.path.exists(os.path.join(temp_lib_base, "timelines"))
     assert os.path.exists(os.path.join(temp_lib_base, "libraries"))
+
 
 def test_init_raises_if_path_missing():
     with pytest.raises(FileNotFoundError):
         Dscaper(dscaper_base_path="/nonexistent/path/for/test")
 
+
 def test_get_dscaper_base_path(temp_lib_base):
     d = Dscaper(dscaper_base_path=temp_lib_base)
     assert d.get_dscaper_base_path() == temp_lib_base
 
+
 def test_store_audio_and_read_audio(temp_lib_base):
     d = Dscaper(dscaper_base_path=temp_lib_base)
     # Prepare dummy audio file (WAV header, not valid audio)
-    # audio_bytes = b'RIFF$\x00\x00\x00WAVEfmt ' + b'\x10\x00\x00\x00\x01\x00\x01\x00' + b'\x40\x1f\x00\x00\x80>\x00\x00\x02\x00\x10\x00data\x00\x00\x00\x00'
+    # audio_bytes = b'RIFF$\x00\x00\x00WAVEfmt ' + b'\x10\x00\x00\x00\x01\x00\x01\x00' +
+    # b'\x40\x1f\x00\x00\x80>\x00\x00\x02\x00\x10\x00data\x00\x00\x00\x00'
     metadata = DscaperAudio(
         library="lib1",
         label="label1",
@@ -108,6 +116,7 @@ def test_store_audio_and_read_audio(temp_lib_base):
     resp6 = d2.read_audio("wrongtype", "mylabel", "audio.mp4")
     assert resp6.status == "error"
 
+
 def test_store_audio_forbidden_filename(temp_lib_base):
     d = Dscaper(dscaper_base_path=temp_lib_base)
     # Prepare dummy audio file (WAV header, not valid audio)
@@ -121,6 +130,7 @@ def test_store_audio_forbidden_filename(temp_lib_base):
     assert resp.status == "error"
     assert resp.status_code == 400
 
+
 def test_get_libraries(temp_lib_base):
     test_lib_path = os.path.join(os.getcwd(), "tests", "data")
     d = Dscaper(dscaper_base_path=test_lib_path)
@@ -132,6 +142,7 @@ def test_get_libraries(temp_lib_base):
     assert isinstance(libraries, list)
     assert len(libraries) > 0
     assert "testlib" in libraries
+
 
 def test_get_labels(temp_lib_base):
     test_lib_path = os.path.join(os.getcwd(), "tests", "data")
@@ -148,6 +159,7 @@ def test_get_labels(temp_lib_base):
     assert len(labels) > 0
     assert "horn" in labels
     assert "horn2" in labels
+
 
 def test_get_filenames(temp_lib_base):
     test_lib_path = os.path.join(os.getcwd(), "tests", "data")
@@ -170,6 +182,7 @@ def test_get_filenames(temp_lib_base):
     assert len(filenames) > 0
     assert "17-CAR-Rolls-Royce-Horn.wav" in filenames
     assert "17-CAR-Rolls-Royce-Horn.json" in filenames
+
 
 def test_get_file_metadata(temp_lib_base):
     d = Dscaper(dscaper_base_path=temp_lib_base)
@@ -201,7 +214,6 @@ def test_get_file_metadata(temp_lib_base):
     resp3 = d.get_file_metadata("non_existing_lib", "non_existing_label", "test_audio.wav")
     assert resp3.status == "error"
     assert resp3.status_code == 404
-
 
 
 def test_get_label_metadata(temp_lib_base):
@@ -312,6 +324,7 @@ def test_get_label_metadata(temp_lib_base):
     assert resp2.status == "error"
     assert resp2.status_code == 404
 
+
 def test_create_timeline_and_list_timelines(temp_lib_base):
     d = Dscaper(dscaper_base_path=temp_lib_base)
     props = DscaperTimeline(duration=10.0, description="desc", name="timeline1")
@@ -335,6 +348,7 @@ def test_create_timeline_and_list_timelines(temp_lib_base):
     resp2 = d.create_timeline(props)
     assert resp2.status == "error"
     assert resp2.status_code == 400
+
 
 def test_add_background_and_list_backgrounds(temp_lib_base):
     d = Dscaper(dscaper_base_path=temp_lib_base)
@@ -378,6 +392,7 @@ def test_add_background_and_list_backgrounds(temp_lib_base):
     list_resp2 = d.list_backgrounds("non-existing-timeline")
     assert list_resp2.status == "error"
     assert list_resp2.status_code == 404
+
 
 def test_add_event_and_list_events(temp_lib_base):
     d = Dscaper(dscaper_base_path=temp_lib_base)
@@ -424,6 +439,7 @@ def test_add_event_and_list_events(temp_lib_base):
     assert list_resp2.status == "error"
     assert list_resp2.status_code == 404
 
+
 def test_generate_timeline(temp_lib_base):
     d = Dscaper(dscaper_base_path=temp_lib_base)
     # Create a timeline first
@@ -451,10 +467,10 @@ def test_generate_timeline(temp_lib_base):
     resp = d.add_background("timeline3", bg)
     assert resp.status == "success"
     # add events
-    ev = DscaperEvent(library="my_lib",position="speakerA")
+    ev = DscaperEvent(library="my_lib", position="speakerA")
     resp = d.add_event("timeline3", ev)
     assert resp.status == "success"
-    ev = DscaperEvent(library="my_lib",position="speakerB")
+    ev = DscaperEvent(library="my_lib", position="speakerB")
     resp = d.add_event("timeline3", ev)
     assert resp.status == "success"
     # add event with const label and source file
@@ -551,6 +567,62 @@ def test_generate_timeline(temp_lib_base):
     assert gen_archive_resp2.status_code == 404
 
 
+def test_generate_timeline_without_duration(temp_lib_base):
+    d = Dscaper(dscaper_base_path=temp_lib_base)
+    # Create a timeline first
+    props = DscaperTimeline(description="desc", name="timeline4")  # no duration
+    resp = d.create_timeline(props)
+    assert resp.status == "success"
+    # Add audio
+    audio_file = os.path.join(os.getcwd(), "tests", "data", "library_inputs", "valid_audio.wav")
+    metadata = DscaperAudio(
+        library="my_lib",
+        label="my_label",
+        filename="audio.wav",
+    )
+    resp = d.store_audio(audio_file, metadata)
+    audio_file = os.path.join(os.getcwd(), "tests", "data", "library_inputs", "valid_audio.wav")
+    metadata = DscaperAudio(
+        library="my_lib",
+        label="my_label2",
+        filename="audio2.wav",
+    )
+    resp = d.store_audio(audio_file, metadata)
+    assert resp.status == "success"
+    # add background
+    bg = DscaperBackground(library="my_lib")
+    resp = d.add_background("timeline4", bg)
+    assert resp.status == "success"
+    # add events
+    ev = DscaperEvent(library="my_lib", label=["const", "my_label"], source_file=["const", "audio.wav"], 
+                      event_time=["const", "1.0"], event_duration=["const", "2.0"])
+    resp = d.add_event("timeline4", ev)
+    assert resp.status == "success"
+    ev = DscaperEvent(library="my_lib", label=["const", "my_label"], source_file=["const", "audio.wav"], 
+                      event_time=["const", "5.0"], event_duration=["const", "2.0"])
+    resp = d.add_event("timeline4", ev)
+    assert resp.status == "success"
+    # generate timeline
+    gen_props = DscaperGenerate(seed=42, ref_db=-20, reverb=0.5)
+    gen_resp = d.generate_timeline("timeline4", gen_props)
+    assert gen_resp.status == "success"
+    assert gen_resp.content is not None
+    generated_data = DscaperGenerate.model_validate(gen_resp.content)
+    assert generated_data.id is not None
+    assert generated_data.timestamp > 0
+    assert isinstance(generated_data.generated_files, list)
+    assert len(generated_data.generated_files) > 0
+    # ['soundscape.wav', 'soundscape.txt', 'soundscape.jams']
+    assert "soundscape.wav" in generated_data.generated_files
+    assert "soundscape.txt" in generated_data.generated_files
+    assert "soundscape.jams" in generated_data.generated_files
+    # open soundscape.wav and check duration
+    soundscape_path = os.path.join(d.get_dscaper_base_path(), "timelines", "timeline4", "generate", generated_data.id, "soundscape.wav")
+    data, sr = sf.read(soundscape_path)
+    duration = len(data) / sr
+    assert abs(duration - 8.0) < 0.1  # duration should be close to 8.0 seconds
+
+
 def test__get_distribution_tuple(temp_lib_base):
     # const
     d = Dscaper(dscaper_base_path=temp_lib_base)
@@ -559,7 +631,7 @@ def test__get_distribution_tuple(temp_lib_base):
     with pytest.raises(ValueError):
         d._get_distribution_tuple(['const', '1', '2'])
     with pytest.raises(ValueError):
-        d._get_distribution_tuple(['const',{ 'invalid': 'format'}])
+        d._get_distribution_tuple(['const', {'invalid': 'format'}])
     # choose
     assert d._get_distribution_tuple(['choose', '[1,2,3]']) == ('choose', ['1', '2', '3'])
     with pytest.raises(ValueError):
@@ -604,6 +676,7 @@ def test__string_to_list(temp_lib_base):
     # assert d._string_to_list('["a", "b", "c"]') == ["a", "b", "c"]
     # assert d._string_to_list('"a"') == ["a"]
 
+
 def test__isfloat(temp_lib_base):
     d = Dscaper(dscaper_base_path=temp_lib_base)
     assert d._isfloat("3.14") is True
@@ -613,6 +686,3 @@ def test__isfloat(temp_lib_base):
     assert d._isfloat("123") is True  # Integers are not considered floats in this context
     assert d._isfloat("") is False
     assert d._isfloat(None) is False
-
-
-
