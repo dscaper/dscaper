@@ -476,7 +476,7 @@ class Dscaper:
             txt_path=txtfile,
             save_isolated_events=properties.save_isolated_events,
             save_isolated_positions=properties.save_isolated_positions,
-            disable_event_looping=False,  # allow event looping for generated timelines
+            disable_event_looping=properties.disable_event_looping,  # allow event looping for generated timelines
             disable_instantiation_warnings=properties.disable_instantiation_warnings,  # disable warnings for generated timelines
             fix_clipping=True  # fix clipping for generated timelines
         )
