@@ -363,6 +363,23 @@ class Dscaper:
                 if os.path.isfile(source_file_path):
                     duration = soundfile.info(source_file_path).duration
                     properties.event_duration = ['const', str(duration)]
+        # compute event_start for events with a preceding_event
+        if properties.preceding_event:
+            preceding_event_file = os.path.join(events_path, f"{properties.preceding_event}.json")
+            if not os.path.isfile(preceding_event_file):
+                return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND,
+                                           content=json.dumps({"description": f"Preceding event with id '{properties.preceding_event}' not found."}))
+            else:
+                with open(preceding_event_file, "r") as f:
+                    preceding_event_data = DscaperEvent.model_validate_json(f.read())
+                if preceding_event_data.event_end is None:
+                    return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST,
+                                               content=json.dumps({"description": "Preceding has no end time"}))
+                if properties.event_time is None or properties.event_time[0] != 'const':
+                    properties.event_time = ['const', str(preceding_event_data.event_end)]
+                else:
+                    # add preceding event end time to the current event_time
+                    properties.event_time = ['const', str(float(preceding_event_data.event_end) + float(properties.event_time[1]))]
         # compute event end time if event_time and event_duration are constant
         if properties.event_time[0] == 'const' and properties.event_duration[0] == 'const':
             event_end = float(properties.event_time[1]) + float(properties.event_duration[1])
