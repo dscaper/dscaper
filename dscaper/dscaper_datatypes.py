@@ -80,6 +80,7 @@ class DscaperGenerate(BaseModel):
     # set by the server
     disable_instantiation_warnings: bool = True  # Whether to disable
     # instantiation warnings during generation
+    disable_event_looping: bool = True  # Whether to disable event looping
 
 
 class DscaperGenerations(BaseModel):
