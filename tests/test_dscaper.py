@@ -567,6 +567,54 @@ def test_generate_timeline(temp_lib_base):
     assert gen_archive_resp2.status_code == 404
 
 
+def test_generate_timeline_with_mp3_events(temp_lib_base):
+    d = Dscaper(dscaper_base_path=temp_lib_base)
+    # Create a timeline first
+    props = DscaperTimeline(duration=10.0, description="desc", name="timeline_mp3")
+    resp = d.create_timeline(props)
+    assert resp.status == "success"
+    # Add audio (mp3)
+    audio_file = os.path.join(os.getcwd(), "tests", "data", "library_inputs", "valid_audio_16kHz.mp3")
+    metadata = DscaperAudio(
+        library="my_lib",
+        label="my_label",
+        filename="audio_16kHz.mp3",
+    )
+    resp = d.store_audio(audio_file, metadata)
+    assert resp.status == "success"
+    audio_file = os.path.join(os.getcwd(), "tests", "data", "library_inputs", "valid_audio_44kHz.mp3")
+    metadata = DscaperAudio(
+        library="my_lib",
+        label="my_label",
+        filename="audio_44kHz.mp3",
+    )
+    resp = d.store_audio(audio_file, metadata)
+    assert resp.status == "success"
+    # add specific event
+    ev = DscaperEvent(
+        library="my_lib",
+        label=["const", "my_label"],
+        source_file=["const", "audio_16kHz.mp3"],
+        position="speakerA"
+    )
+    resp = d.add_event("timeline_mp3", ev)
+    assert resp.status == "success"
+    # add randomly chosen event
+    ev = DscaperEvent(
+        library="my_lib",
+        label=["const", "my_label"]
+    )
+    resp = d.add_event("timeline_mp3", ev)
+    assert resp.status == "success"
+    # generate timeline
+    gen_props = DscaperGenerate()
+    gen_resp = d.generate_timeline("timeline_mp3", gen_props)
+    assert gen_resp.status == "success"
+    assert gen_resp.content is not None
+    generated_data = DscaperGenerate.model_validate(gen_resp.content)
+    assert generated_data.id is not None
+
+
 def test_generate_timeline_without_duration(temp_lib_base):
     d = Dscaper(dscaper_base_path=temp_lib_base)
     # Create a timeline first

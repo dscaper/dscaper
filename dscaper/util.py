@@ -89,6 +89,7 @@ def _get_sorted_files(folder_path):
     # Note, we sort the list to ensure consistent behavior across operating
     # systems.
     files = sorted(glob.glob(os.path.join(folder_path, "*.wav")))
+    files += sorted(glob.glob(os.path.join(folder_path, "*.mp3")))
     files = [f for f in files if os.path.isfile(f)]
 
     return files
