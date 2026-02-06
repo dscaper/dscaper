@@ -24,6 +24,7 @@ import csv
 FG_PATH = 'tests/data/audio/foreground'
 BG_PATH = 'tests/data/audio/background'
 SHORT_BG_PATH = 'tests/data/audio/short_background'
+SHORT_FG_PATH = 'tests/data/audio/short_foreground'
 
 ALT_FG_PATH = 'tests/data/audio_alt_path/foreground'
 ALT_BG_PATH = 'tests/data/audio_alt_path/background'
@@ -1072,7 +1073,7 @@ def test_validate_duration():
                       duration_tuple)
 
     # bad consts
-    bad_dur_values = [None, -1, 0, 1j, 'yes', [], [5]]
+    bad_dur_values = [None, -1, 1j, 'yes', [], [5]]
     for bdv in bad_dur_values:
         __test_bad_duration_tuple(('const', bdv))
 
@@ -1406,6 +1407,16 @@ def test_scaper_instantiate_event():
     assert instantiated_event.role == 'foreground'
     assert dscaper.util.is_real_number(instantiated_event.pitch_shift)
     assert 0.8 <= instantiated_event.time_stretch <= 1.2
+
+    # test event without duration (should use source duration)
+    sc_2 = dscaper.Scaper(10.0, fg_path=SHORT_FG_PATH, bg_path=BG_PATH)
+    fg_event_no_duration = fg_event._replace(event_duration=('const', 0), label=('const', 'short-siren'), event_time=('const', 0))
+    instantiated_event = sc_2._instantiate_event(
+        fg_event_no_duration, isbackground=False, allow_repeated_label=True,
+        allow_repeated_source=True, used_labels=[], used_source_files=[],
+        disable_instantiation_warnings=True)
+    assert instantiated_event.label == 'short-siren'
+    assert instantiated_event.event_duration - 0.6 < 1e-3
 
     # when a label needs to be replaced because it's used already
     fg_event8 = fg_event._replace(label=('choose', []))

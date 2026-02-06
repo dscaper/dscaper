@@ -784,8 +784,7 @@ def _validate_duration(duration_tuple):
 
     # Ensure the values are valid for duration
     if duration_tuple[0] == "const":
-        if (not is_real_number(duration_tuple[1]) or
-                duration_tuple[1] <= 0):
+        if (not is_real_number(duration_tuple[1]) or duration_tuple[1] < 0):
             raise ScaperError(
                 'Duration must be a real number greater than zero.')
     elif duration_tuple[0] == "choose" or duration_tuple[0] == "choose_weighted":
@@ -1634,6 +1633,9 @@ class Scaper(object):
         # If the foreground event's label is in the protected list, use the
         # source file's duration without modification.
         elif label in self.protected_labels:
+            event_duration = source_duration
+        # If event duration is constant zero, use the source file's duration without modification.
+        elif event.event_duration[0] == "const" and event.event_duration[1] == 0:
             event_duration = source_duration
         else:
             # determine event duration
