@@ -170,12 +170,31 @@ Attributes of `DscaperEvent`:
   - `position (str | None)`: Optional position of the event (e.g., seat_1, seat_2, door, window). Defaults to `None`. This allows you to categorize events in the timeline and write them to separate audio files when generating the timeline. This is useful for applying different post-processings, e.g. applying different room acoustics to different speakers and sound sources.
   - `speaker (str | None)`: Optional speaker of the event. Defaults to `None`. This allows you to categorize events by speaker.
   - `text (str | None)`: Used for audio with speech content. This is a string that can be used to save the content. 
+  - `preceding_event (str | None)`: The ID of a preceding event. If specified, the start time of the current event will be 
+  computed relative to the end time of the preceding event. This is useful for creating sequences of events that should occur one after another without overlap. Preceding events must have a constant event_time and event_duration, so that the end time can be computed. Defaults to `None`.
 
 ```python
 from scaper.dscaper_datatypes import DscaperEvent
 
 event_metadata = DscaperEvent(..)
 dsc.add_event("my_timeline", event_metadata)
+```
+
+#### Adding consecutive events
+```python
+event1_metadata = DscaperEvent(
+    library="my_library",
+    label=["const", "my_label"],
+    source_file=["const", "my_source_file"]
+)
+event1_resp = dsc.add_event("my_timeline", event1_metadata)
+event2_metadata = DscaperEvent(
+    library="my_library",
+    label=["choose", "[]"],  # Sample from all available labels in the library
+    event_time=["const", "5"],  # Start the event 5 seconds after the end of the preceding event
+    preceding_event=event1_resp.content.id  # Specify the ID of the preceding event
+)
+event2_resp = dsc.add_event("my_timeline", event2_metadata)
 ```
 ### Generating timelines
 Once you have added all the necessary background sounds and events to the timeline, you can generate the audio using the `generate_timeline` method. This method takes a `DscaperGenerate` instance as a parameter.
