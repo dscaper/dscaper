@@ -1387,7 +1387,8 @@ class Scaper(object):
             NOTE: The value specified by this tuple should be equal to or
             smaller than the source file's duration, and larger values will be
             automatically changed to fulfill this requirement when calling
-            ``Scaper.generate``.
+            ``Scaper.generate``. When set to zero, the event duration will 
+            be set to the source file's duration when calling ``Scaper.generate``.
         snr : tuple
             Specifies the desired signal to noise ratio (SNR) between the event
             and the background. See Notes below for the expected format of
