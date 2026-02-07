@@ -163,20 +163,38 @@ Attributes of `DscaperEvent`:
   - `source_file (list[str])`: The source audio file for the event, typically in the form `['choose', '[]']` which will randomly choose one file in the library.
   - `source_time (list[str])`: The start time within the source file, typically in the form `['const', '0']` which means the event starts at the beginning of the source file.
   - `event_time (list[str])`: The time at which the event occurs in the timeline, typically in the form `['const', '0']` which means the event starts at the beginning of the timeline.
-  - `event_duration (list[str]) | None`: The duration of the event. Can be set to `None` to use the duration of the source file, or specified as a distribution like `['const', '5']` which means the event lasts for 5 seconds. If not set and no source file is specified, it defaults to `['const', '5']`.
-  , typically in the form `['const', '5']` which means the event lasts for 5 seconds.
+  - `event_duration (list[str]) | None`: The duration of the event. Can be set to a distribution like `['uniform', min, max]` or a constant value like `['const', '5']`. If not set and a source file is given, it will be set to the source file's duration when beeing added. If not set and no source file is specified, it will be temporarily set to ['const', '0'] and will be set to the source file's duration when calling `generate_timeline`,
   - `snr (list[str])`: The signal-to-noise ratio for the event, typically in the form `['const', '0']`.
   - `pitch_shift (list[str] | None)`: Optional pitch shift parameters for the event. Defaults to `None`.
   - `time_stretch (list[str] | None)`: Optional time stretch parameters for the event. Defaults to `None`.
   - `position (str | None)`: Optional position of the event (e.g., seat_1, seat_2, door, window). Defaults to `None`. This allows you to categorize events in the timeline and write them to separate audio files when generating the timeline. This is useful for applying different post-processings, e.g. applying different room acoustics to different speakers and sound sources.
   - `speaker (str | None)`: Optional speaker of the event. Defaults to `None`. This allows you to categorize events by speaker.
   - `text (str | None)`: Used for audio with speech content. This is a string that can be used to save the content. 
+  - `preceding_event (str | None)`: The ID of a preceding event. If specified, the start time of the current event will be 
+  computed relative to the end time of the preceding event. This is useful for creating sequences of events that should occur one after another without overlap. Preceding events must have a constant event_time and event_duration, so that the end time can be computed. Defaults to `None`.
 
 ```python
 from scaper.dscaper_datatypes import DscaperEvent
 
 event_metadata = DscaperEvent(..)
 dsc.add_event("my_timeline", event_metadata)
+```
+
+#### Adding consecutive events
+```python
+event1_metadata = DscaperEvent(
+    library="my_library",
+    label=["const", "my_label"],
+    source_file=["const", "my_source_file"]
+)
+event1_resp = dsc.add_event("my_timeline", event1_metadata)
+event2_metadata = DscaperEvent(
+    library="my_library",
+    label=["choose", "[]"],  # Sample from all available labels in the library
+    event_time=["const", "5"],  # Start the event 5 seconds after the end of the preceding event
+    preceding_event=event1_resp.content.id  # Specify the ID of the preceding event
+)
+event2_resp = dsc.add_event("my_timeline", event2_metadata)
 ```
 ### Generating timelines
 Once you have added all the necessary background sounds and events to the timeline, you can generate the audio using the `generate_timeline` method. This method takes a `DscaperGenerate` instance as a parameter.

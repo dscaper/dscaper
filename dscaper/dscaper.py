@@ -335,26 +335,57 @@ class Dscaper:
         # Return a response indicating success
         return DscaperJsonResponse(status_code=status.HTTP_201_CREATED, content=properties.model_dump_json())
 
-    def add_event(self, name: str, properties: DscaperEvent) -> DscaperJsonResponse:
+    def add_event(self, timeline_name: str, properties: DscaperEvent) -> DscaperJsonResponse:
         """Add an event to the timeline.
-        :param name: The name of the timeline.
+        :param timeline_name: The name of the timeline.
         :param properties: Properties for the event.
         :return: A DscaperEvent object containing the added event's metadata.
         Exceptions:
             - 404: If the timeline does not exist.
         """
-        timeline_path = os.path.join(self.timeline_basedir, name)
+        timeline_path = os.path.join(self.timeline_basedir, timeline_name)
         timeline_config = os.path.join(timeline_path, "timeline.json")
         # Check if the timeline exists
         if not os.path.exists(timeline_config):
             return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND,
-                                       content=json.dumps({"description": f"Timeline '{name}' does not exist."}))
+                                       content=json.dumps({"description": f"Timeline '{timeline_name}' does not exist."}))
         # Create the events directory if it does not exist
         events_path = os.path.join(timeline_path, "events")
         os.makedirs(events_path, exist_ok=True)
         # Create the event object
         event_id = str(uuid.uuid4())
         properties.id = event_id
+        # If event_duration is not set
+        if properties.event_duration is None:
+            # If source_file is constant, get the duration of the audio file and set event_duration to it
+            if properties.source_file and properties.source_file[0] == 'const':
+                source_file_path = os.path.join(self.library_basedir, properties.library, properties.label[1], properties.source_file[1])
+                if os.path.isfile(source_file_path):
+                    duration = soundfile.info(source_file_path).duration
+                    properties.event_duration = ['const', str(duration)]
+            # If source file is not known, set it to 0 and it will be set to the audio file duration when generating the timeline
+            else:
+                properties.event_duration = ['const', '0']
+        # compute event_start for events with a preceding_event
+        if properties.preceding_event:
+            try:
+                preceding_event = self._get_event_by_id(timeline_name, properties.preceding_event)
+            except FileNotFoundError:
+                return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND,
+                                           content=json.dumps({"description": f"Preceding event '{properties.preceding_event}' not found."}))
+            else:
+                if preceding_event.event_end is None:
+                    return DscaperJsonResponse(status="error", status_code=status.HTTP_400_BAD_REQUEST,
+                                               content=json.dumps({"description": "Preceding event has no end time"}))
+                if properties.event_time is None or properties.event_time[0] != 'const':
+                    properties.event_time = ['const', str(preceding_event.event_end)]
+                else:
+                    # add preceding event end time to the current event_time
+                    properties.event_time = ['const', str(float(preceding_event.event_end) + float(properties.event_time[1]))]
+        # compute event end time if event_time and event_duration are constant
+        if properties.event_duration and properties.event_time[0] == 'const' and properties.event_duration[0] == 'const':
+            event_end = float(properties.event_time[1]) + float(properties.event_duration[1])
+            properties.event_end = event_end
         # Save the event to a JSON file
         event_file = os.path.join(events_path, f"{event_id}.json")
         with open(event_file, "w") as f:
@@ -362,20 +393,20 @@ class Dscaper:
         # Return a response indicating success
         return DscaperJsonResponse(status_code=status.HTTP_201_CREATED, content=properties.model_dump_json())
 
-    def generate_timeline(self, name: str, properties: DscaperGenerate) -> DscaperJsonResponse:
+    def generate_timeline(self, timeline_name: str, properties: DscaperGenerate) -> DscaperJsonResponse:
         """Generate the timeline.
-        :param name: The name of the timeline.
+        :param timeline_name: The name of the timeline.
         :param properties: Properties for the generation.
         :return: A response indicating the timeline was generated.
         Exceptions:
             - 404: If the timeline does not exist.
         """
-        timeline_path = os.path.join(self.timeline_basedir, name)
+        timeline_path = os.path.join(self.timeline_basedir, timeline_name)
         timeline_config = os.path.join(timeline_path, "timeline.json")
         # Check if the timeline exists
         if not os.path.exists(timeline_config):
             return DscaperJsonResponse(status="error", status_code=status.HTTP_404_NOT_FOUND,
-                                       content=json.dumps({"description": f"Timeline '{name}' does not exist."}))
+                                       content=json.dumps({"description": f"Timeline '{timeline_name}' does not exist."}))
         # Create the generate directory if it does not exist
         generate_base = os.path.join(timeline_path, "generate")
         os.makedirs(generate_base, exist_ok=True)
@@ -407,21 +438,7 @@ class Dscaper:
             random_state=properties.seed
         )
         sc.ref_db = properties.ref_db  # Set the reference dB level
-        # check if background folder exists
-        if os.path.exists(os.path.join(timeline_path, "background")):
-            # add backgrounds
-            for bg in os.listdir(os.path.join(timeline_path, "background")):
-                # print(f"*** Processing background: {bg}")
-                bg_file = os.path.join(timeline_path, "background", bg)
-                if os.path.isfile(bg_file):
-                    with open(bg_file, "r") as f:
-                        background = DscaperBackground.model_validate_json(f.read())
-                    sc.add_background(
-                        label=self._get_distribution_tuple(background.label),
-                        source_file=self._get_distribution_tuple(background.source_file),
-                        source_time=self._get_distribution_tuple(background.source_time),
-                        library=os.path.join(self.library_basedir, background.library) if background.library else None
-                    )
+
         # check if events folder exists
         last_event_end_time = 0.0
         if os.path.exists(os.path.join(timeline_path, "events")):
@@ -431,14 +448,6 @@ class Dscaper:
                 if os.path.isfile(event_file):
                     with open(event_file, "r") as f:
                         event_data = DscaperEvent.model_validate_json(f.read())
-                    if not event_data.event_duration:
-                        # If event_duration is not set, use duration of the audio file or default to 5 seconds
-                        event_data.event_duration = ['const', '5']
-                        if event_data.source_file and event_data.source_file[0] == 'const':
-                            source_file_path = os.path.join(self.library_basedir, event_data.library, event_data.label[1], event_data.source_file[1])
-                            if os.path.isfile(source_file_path):
-                                duration = soundfile.info(source_file_path).duration
-                                event_data.event_duration = ['const', str(duration)]
                     sc.add_event(
                         label=self._get_distribution_tuple(event_data.label),
                         source_file=self._get_distribution_tuple(event_data.source_file),
@@ -453,13 +462,31 @@ class Dscaper:
                         speaker=event_data.speaker,
                         text=event_data.text
                     )
-                    if event_data.event_time[0] == 'const' and event_data.source_file[0] == 'const':
-                        event_end = float(event_data.event_time[1]) + float(event_data.event_duration[1])
+                    # Keep track of the last event end time to adjust the timeline duration if needed
+                    event_duration = event_data.event_duration if event_data.event_duration else ['const', '0']
+                    if event_data.event_time[0] == 'const' and event_duration[0] == 'const':
+                        event_end = float(event_data.event_time[1]) + float(event_duration[1])
                         if event_end > last_event_end_time:
                             last_event_end_time = event_end
 
+        # adjust the timeline duration if it is smaller than the end time of the last event
         if adjust_timeline_duration:
             sc.duration = last_event_end_time + 1.0  # add 1 second buffer
+
+        # check if background folder exists
+        if os.path.exists(os.path.join(timeline_path, "background")):
+            # add backgrounds
+            for bg in os.listdir(os.path.join(timeline_path, "background")):
+                bg_file = os.path.join(timeline_path, "background", bg)
+                if os.path.isfile(bg_file):
+                    with open(bg_file, "r") as f:
+                        background = DscaperBackground.model_validate_json(f.read())
+                    sc.add_background(
+                        label=self._get_distribution_tuple(background.label),
+                        source_file=self._get_distribution_tuple(background.source_file),
+                        source_time=self._get_distribution_tuple(background.source_time),
+                        library=os.path.join(self.library_basedir, background.library) if background.library else None
+                    )
 
         # Generate the timeline
         audiofile = os.path.join(generate_dir, "soundscape.wav")
@@ -721,6 +748,23 @@ class Dscaper:
             content=zip_data,
             media_type="application/zip"
         )
+
+    def _get_event_by_id(self, timeline_name: str, event_id: str) -> DscaperEvent:
+        """Get an event by its ID.
+        :param timeline_name: The name of the timeline.
+        :param event_id: The ID of the event.
+        :return: The DscaperEvent object or None if not found.
+        Exceptions:
+            - 404: If the timeline or event does not exist.
+        """
+        timeline_path = os.path.join(self.timeline_basedir, timeline_name)
+        events_path = os.path.join(timeline_path, "events")
+        event_file = os.path.join(events_path, f"{event_id}.json")
+        if not os.path.exists(event_file):
+            raise FileNotFoundError(f"Event with ID '{event_id}' not found in timeline '{timeline_name}'.")
+        with open(event_file, "r") as f:
+            event = DscaperEvent.model_validate_json(f.read())
+        return event
 
     # Helper functions to convert distributions
     # to tuples for scaper compatibility

@@ -702,6 +702,113 @@ def test_generate_timeline_with_event_loops(temp_lib_base):
     # TODO: check that event looping worked correctly
 
 
+def test_generate_timeline_with_relative_event_times(temp_lib_base):
+    d = Dscaper(dscaper_base_path=temp_lib_base)
+    # Create a timeline first
+    props = DscaperTimeline(duration=15.0, description="desc", name="timeline6")
+    resp = d.create_timeline(props)
+    assert resp.status == "success"
+    # Add audio
+    audio_file = os.path.join(os.getcwd(), "tests", "data", "library_inputs", "valid_audio.wav")
+    metadata = DscaperAudio(
+        library="my_lib",
+        label="my_label",
+        filename="audio.wav",
+    )
+    resp = d.store_audio(audio_file, metadata)
+    assert resp.status == "success"
+    # add event with event time 2.0 seconds after start
+    ev = DscaperEvent(
+        library="my_lib",
+        label=["const", "my_label"],
+        source_file=["const", "audio.wav"],
+        event_time=["const", "2.0"],  # two seconds after start
+    )
+    resp = d.add_event("timeline6", ev)
+    event_1_id = resp.content["id"]
+    assert resp.status == "success"
+    # assert end time of event is start time + audio duration
+    event_1_data = d._get_event_by_id("timeline6", event_1_id)
+    event_1_end = event_1_data.event_end or 0.0
+    assert event_1_end - 2.68 < 0.1
+    # add event that starts 3.0 seconds after the end of the previous event
+    ev = DscaperEvent(
+        library="my_lib",
+        label=["const", "my_label"],
+        source_file=["const", "audio.wav"],
+        event_time=["const", "3.0"],  # three seconds after end
+        preceding_event=event_1_id  
+    )
+    resp = d.add_event("timeline6", ev)
+    event_2_id = resp.content["id"]
+    assert resp.status == "success"
+    # assert start and end time of event is correct
+    event_2_data = d._get_event_by_id("timeline6", event_2_id)
+    event_2_start = event_2_data.event_time
+    assert event_2_start[0] == "const"
+    assert float(event_2_start[1]) - 3 - event_1_end < 0.1
+    event_2_end = event_2_data.event_end or 0.0
+    assert event_2_end - 2.8 - 3 - event_1_end < 0.1
+    # add event that start directly after the end of the previous event
+    ev = DscaperEvent(
+        library="my_lib",
+        label=["const", "my_label"],
+        source_file=["const", "audio.wav"],
+        preceding_event=event_2_id
+    )
+    resp = d.add_event("timeline6", ev)
+    event_3_id = resp.content["id"]
+    assert resp.status == "success"
+    # assert start and end time of event is correct
+    event_3_data = d._get_event_by_id("timeline6", event_3_id)
+    event_3_start = event_3_data.event_time
+    assert event_3_start[0] == "const"
+    assert float(event_3_start[1]) - event_2_end < 0.1
+    event_3_end = event_3_data.event_end or 0.0
+    assert event_3_end - 2.8 - event_2_end < 0.1
+    #  add event with incorrect preceding_event ID
+    ev = DscaperEvent(
+        library="my_lib",
+        label=["const", "my_label"],
+        source_file=["const", "audio.wav"],
+        preceding_event="non-existing-id"  
+    )
+    resp = d.add_event("timeline6", ev)
+    assert resp.status == "error"
+    # add event where preceding event has no end time
+    ev = DscaperEvent(
+        library="my_lib",
+        label=["const", "my_label"],
+        event_duration=["uniform", "1.0", "3.0"],  # random duration
+    )
+    resp = d.add_event("timeline6", ev)
+    event_4_id = resp.content["id"]
+    assert resp.status == "success"
+    ev = DscaperEvent(
+        library="my_lib",
+        label=["const", "my_label"],
+        source_file=["const", "audio.wav"],
+        preceding_event=event_4_id
+    )
+    resp = d.add_event("timeline6", ev)
+    assert resp.status == "error"
+    # add event with non constant event time and preceding event
+    ev = DscaperEvent(
+        library="my_lib",
+        label=["const", "my_label"],
+        source_file=["const", "audio.wav"],
+        event_time=["uniform", "1.0", "5.0"],  # non-constant event time
+        preceding_event=event_1_id
+    )
+    resp = d.add_event("timeline6", ev)
+    # assert that event  directly follows the preceding event end
+    event_5_id = resp.content["id"]
+    event_5_data = d._get_event_by_id("timeline6", event_5_id)
+    event_5_start = event_5_data.event_time
+    assert event_5_start[0] == "const"
+    assert float(event_5_start[1]) - event_1_end < 0.1
+
+
 def test__get_distribution_tuple(temp_lib_base):
     # const
     d = Dscaper(dscaper_base_path=temp_lib_base)
