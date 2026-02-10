@@ -1,5 +1,5 @@
 import json
-import os
+
 
 def jams_to_rttm(jams_path: str, rttm_path: str):
     """
@@ -20,6 +20,6 @@ def jams_to_rttm(jams_path: str, rttm_path: str):
                     start = event['time']
                     duration = event['duration']
                     value = event['value']
-                    if value['speaker'] is not None:                            
+                    if value['speaker'] is not None:
                         print(f"SPEAKER {audio_path} 1 {start:.3f} {duration:.3f} <NA> <NA> {value['speaker']} <NA> <NA>")
                         rttm_file.write(f"SPEAKER {audio_path} 1 {start:.3f} {duration:.3f} <NA> <NA> {value['speaker']} <NA> <NA>\n")

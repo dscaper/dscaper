@@ -1,6 +1,7 @@
 import mytextgrid
 import json
 
+
 def jams_to_textgrid(jams_path, textgrid_path):
     """
     Convert a JAMS file to a TextGrid file.
@@ -12,30 +13,29 @@ def jams_to_textgrid(jams_path, textgrid_path):
     with open(jams_path, 'r') as jams_file:
         jams_data = json.load(jams_file)
 
-    tg = mytextgrid.TextGrid(0, 100)
-
     scaper_data = None
+    duration = 100
     for annotation in jams_data['annotations']:
-        audio_path = annotation['sandbox']['scaper']['audio_path']
         if annotation['namespace'] == 'scaper':
             scaper_data = annotation['data']
+            duration = round(annotation['duration'], 3)
             break
     if scaper_data is None:
         raise ValueError("No 'scaper' namespace found in JAMS file.")
-    
+
+    tg = mytextgrid.create_textgrid(0, duration)
+
     speakers = set()
     for event in scaper_data:
         if 'speaker' in event['value'] and event['value']['speaker'] is not None:
             speakers.add(event['value']['speaker'])
 
-    # print(f"Found speakers: {speakers}")
     tiers = {}
     for speaker in speakers:
         tiers[speaker] = tg.insert_tier(speaker)
     if 'no_speaker' not in tiers:
         tiers['no_speaker'] = tg.insert_tier('no_speaker')
 
-    
     current_time = {}
     boundary_count = {}
     for speaker in speakers:
@@ -43,7 +43,7 @@ def jams_to_textgrid(jams_path, textgrid_path):
         boundary_count[speaker] = 0
 
     for event in scaper_data:
-        start_time = round(float(event['time']),3)
+        start_time = round(float(event['time']), 3)
         duration = event['duration']
         value = event['value']
         if 'speaker' in value and value['speaker'] is not None:
@@ -62,8 +62,7 @@ def jams_to_textgrid(jams_path, textgrid_path):
             current_time[speaker] = end_time
             tiers[speaker].set_text_at_index(boundary_count[speaker], text)
             boundary_count[speaker] += 1
-            
+
     tg.describe()
     tg.write(textgrid_path)
     print(f"TextGrid file written to {textgrid_path}")
-    
