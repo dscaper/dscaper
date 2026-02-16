@@ -692,6 +692,7 @@ def test_generate_timeline_with_event_loops(temp_lib_base):
         label=["const", "my_label"],
         source_file=["const", "audio.wav"],
         event_duration=["const", "10.0"],
+        loop_event=True
     )
     resp = d.add_event("timeline5", ev)
     assert resp.status == "success"

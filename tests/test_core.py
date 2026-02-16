@@ -1422,6 +1422,17 @@ def test_scaper_instantiate_event():
     assert instantiated_event.label == 'short-siren'
     assert instantiated_event.event_duration - 0.6 < 1e-3
 
+    # test event without duration and loop_event=True (should continue the event for soundscape duration)
+    sc_3 = dscaper.Scaper(20.0, fg_path=SHORT_FG_PATH, bg_path=BG_PATH)
+    fg_event_no_duration_loop = fg_event._replace(event_duration=('const', 0), label=('const', 'short-siren'),
+                                                  event_time=('const', 0), loop_event=True, time_stretch=None)
+    instantiated_event = sc_3._instantiate_event(
+        fg_event_no_duration_loop, isbackground=False, allow_repeated_label=True,
+        allow_repeated_source=True, used_labels=[], used_source_files=[],
+        disable_instantiation_warnings=True, disable_event_looping=False)
+    assert instantiated_event.label == 'short-siren'
+    assert instantiated_event.event_duration == sc_3.duration
+
     # when a label needs to be replaced because it's used already
     fg_event8 = fg_event._replace(label=('choose', []))
     # repeat several times to increase chance of hitting the line we need to
