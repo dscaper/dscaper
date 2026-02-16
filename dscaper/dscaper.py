@@ -460,7 +460,8 @@ class Dscaper:
                         position=event_data.position,
                         library=os.path.join(self.library_basedir, event_data.library) if event_data.library else None,
                         speaker=event_data.speaker,
-                        text=event_data.text
+                        text=event_data.text,
+                        loop_event=event_data.loop_event
                     )
                     # Keep track of the last event end time to adjust the timeline duration if needed
                     event_duration = event_data.event_duration if event_data.event_duration else ['const', '0']

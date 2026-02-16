@@ -61,7 +61,7 @@ class DscaperEvent(BaseModel):
     id: Optional[str] = None  # set by the server
     preceding_event: Optional[str] = None  # id of the preceding event
     event_end: Optional[float] = None  # set by the server
-    loop_event: Optional[bool] = False
+    loop_event: bool = False
 
 
 class DscaperEvents(BaseModel):
@@ -80,7 +80,7 @@ class DscaperGenerate(BaseModel):
     # set by the server
     disable_instantiation_warnings: bool = True  # Whether to disable
     # instantiation warnings during generation
-    disable_event_looping: bool = True  # Whether to disable event looping
+    disable_event_looping: bool = False  # Whether to disable event looping
 
 
 class DscaperGenerations(BaseModel):

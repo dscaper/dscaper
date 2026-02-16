@@ -1637,9 +1637,13 @@ class Scaper(object):
         # source file's duration without modification.
         elif label in self.protected_labels:
             event_duration = source_duration
-        # If event duration is constant zero, use the source file's duration without modification.
+        # If event duration is constant zero, set it to the source file's duration 
+        # or to the remaining duration of the soundscape if looping is disabled and event time is constant.
         elif event.event_duration[0] == "const" and event.event_duration[1] == 0:
-            event_duration = source_duration
+            if event.loop_event:
+                event_duration = self.duration - event.event_time[1] if event.event_time[0] == "const" else self.duration
+            else:
+                event_duration = source_duration
         else:
             # determine event duration
             # For background events the duration is fixed to self.duration
@@ -2231,8 +2235,8 @@ class Scaper(object):
                         tmpfiles_internal.append(
                             tempfile.NamedTemporaryFile(
                                 suffix='.wav', delete=False))
-                        
-                        # synthesize edited foreground sound event, 
+
+                        # synthesize edited foreground sound event,
                         # doing the trim via soundfile
                         event_sr = soundfile.info(e.value['source_file']).samplerate
                         start = int(e.value['source_time'] * event_sr)
@@ -2240,8 +2244,9 @@ class Scaper(object):
                         event_audio, event_sr = soundfile.read(
                             e.value['source_file'], always_2d=True,
                             start=start, stop=stop)
-                        # tile the event along the appropriate dimensions
-                        if not disable_event_looping:
+                        # tile the event along the appropriate dimensions if necessary
+                        # if event duration is longer than source file duration and looping is not disabled
+                        if not disable_event_looping and e.value['loop_event']:
                             event_audio = np.tile(event_audio, (ntiles, 1))
                             event_audio = event_audio[:stop]
                         event_audio = tfm.build_array(
@@ -2249,7 +2254,7 @@ class Scaper(object):
                             sample_rate_in=event_sr
                         )
                         event_audio = event_audio.reshape(-1, self.n_channels)
-                        
+
                         # NOW compute LUFS
                         fg_lufs = get_integrated_lufs(event_audio, self.sr)
 
@@ -2261,7 +2266,7 @@ class Scaper(object):
                         # Apply short fade in and out
                         # (avoid unnatural sound onsets/offsets)
                         if self.fade_in_len > 0:
-                            fade_in_samples =  int(self.fade_in_len * self.sr)
+                            fade_in_samples = int(self.fade_in_len * self.sr)
                             fade_in_window = np.sin(np.linspace(0, np.pi / 2, fade_in_samples))[..., None]
                             event_audio[:fade_in_samples] *= fade_in_window
 
