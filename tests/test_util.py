@@ -221,7 +221,8 @@ def test_max_polyphony():
                                            position=None,
                                            library=None,
                                            speaker=None,
-                                           text=None)
+                                           text=None,
+                                           loop_event=False)
 
             ann.append(time=ind / 2.,
                        duration=10,
@@ -248,7 +249,8 @@ def test_max_polyphony():
                                            position=None,
                                            library=None,
                                            speaker=None,
-                                           text=None)
+                                           text=None,
+                                           loop_event=False)
 
             ann.append(time=ind * 10,
                        duration=5,

@@ -111,7 +111,7 @@ def _compare_scaper_jams(jam, regjam, exclude_additional_scaper_sandbox_keys=[])
     assert 'scaper' in regann.sandbox.keys()
 
     excluded_scaper_sandbox_keys = [
-        'bg_spec', 'fg_spec', 'scaper_version', 'soundscape_audio_path', 
+        'bg_spec', 'fg_spec', 'scaper_version', 'soundscape_audio_path',
         'isolated_events_audio_path',
     ]
     excluded_scaper_sandbox_keys.extend(exclude_additional_scaper_sandbox_keys)
@@ -127,12 +127,12 @@ def _compare_scaper_jams(jam, regjam, exclude_additional_scaper_sandbox_keys=[])
                     ann.sandbox.scaper['bg_spec']] 
     fg_spec_list = [[list(x) if isinstance(x, tuple) else x for x in e] for e in
                     ann.sandbox.scaper['fg_spec']]
-    
+
     # print("bg_spec_list", bg_spec_list)
     # print("regann.sandbox.scaper['bg_spec']", regann.sandbox.scaper['bg_spec'])
     # print("fg_spec_list", fg_spec_list)
     # print("regann.sandbox.scaper['fg_spec']", regann.sandbox.scaper['fg_spec'])
-    
+
     assert (fg_spec_list == regann.sandbox.scaper['fg_spec'])
     assert (bg_spec_list == regann.sandbox.scaper['bg_spec'])
 
@@ -1336,7 +1336,9 @@ def test_scaper_add_background():
                                   position=None,
                                   library=None,
                                   speaker=None,
-                                  text=None)
+                                  text=None,
+                                  loop_event=True
+                                  )
     assert sc.bg_spec == [bg_event_expected]
 
 
@@ -1370,7 +1372,8 @@ def test_scaper_add_event():
                                   position=None,
                                   library=None,
                                   speaker=None,
-                                  text=None)
+                                  text=None,
+                                  loop_event=False)
     assert sc.fg_spec[0] == fg_event_expected
 
 
@@ -1389,7 +1392,8 @@ def test_scaper_instantiate_event():
                          position=None,
                          library=None,
                          speaker=None,
-                         text=None)
+                         text=None,
+                         loop_event=False)
 
     # test valid case
     sc = dscaper.Scaper(10.0, fg_path=FG_PATH, bg_path=BG_PATH)

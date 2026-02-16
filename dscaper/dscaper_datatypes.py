@@ -61,6 +61,7 @@ class DscaperEvent(BaseModel):
     id: Optional[str] = None  # set by the server
     preceding_event: Optional[str] = None  # id of the preceding event
     event_end: Optional[float] = None  # set by the server
+    loop_event: Optional[bool] = False
 
 
 class DscaperEvents(BaseModel):

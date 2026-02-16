@@ -32,7 +32,8 @@
             "position": null,
             "library": null,
             "speaker": null,
-            "text": null
+            "text": null,
+            "loop_event": true
           },
           "confidence": 1.0
         },
@@ -52,7 +53,8 @@
             "position": null,
             "library": null,
             "speaker": null,
-            "text": null
+            "text": null,
+            "loop_event": false
           },
           "confidence": 1.0
         },
@@ -72,7 +74,8 @@
             "position": null,
             "library": null,
             "speaker": null,
-            "text": null
+            "text": null,
+            "loop_event": false
           },
           "confidence": 1.0
         },
@@ -92,7 +95,8 @@
             "position": null,
             "library": null,
             "speaker": null,
-            "text": null
+            "text": null,
+            "loop_event": false
           },
           "confidence": 1.0
         }
@@ -135,7 +139,8 @@
               null,
               null,
               null,
-              null
+              null,
+              false
             ],
             [
               [
@@ -171,7 +176,8 @@
               null,
               null,
               null,
-              null
+              null,
+              false
             ],
             [
               [
@@ -207,7 +213,8 @@
               null,
               null,
               null,
-              null
+              null,
+              false
             ]
           ],
           "bg_spec": [
@@ -242,7 +249,8 @@
               null,
               null,
               null,
-              null
+              null,
+              true
             ]
           ],
           "fg_labels": [

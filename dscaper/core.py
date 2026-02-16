@@ -59,7 +59,7 @@ SUPPORTED_DIST = {"const": _sample_const,
 EventSpec = namedtuple(
     'EventSpec',
     ['label', 'source_file', 'source_time', 'event_time', 'event_duration',
-     'snr', 'role', 'pitch_shift', 'time_stretch','position', 'library', 'speaker', 'text'])
+     'snr', 'role', 'pitch_shift', 'time_stretch', 'position', 'library', 'speaker', 'text', 'loop_event'])
 '''
 Container for storing event specifications, either probabilistic (i.e. using
 distribution tuples to specify possible values) or instantiated (i.e. storing
@@ -1337,14 +1337,15 @@ class Scaper(object):
                              position=None,
                              library=library,
                              speaker=None,
-                             text=None)
+                             text=None,
+                             loop_event=True)
 
         # Add event to background spec
         self.bg_spec.append(bg_event)
 
 
     def add_event(self, label, source_file, source_time, event_time,
-                  event_duration, snr, pitch_shift, time_stretch, position=None, library=None, speaker=None, text=None):
+                  event_duration, snr, pitch_shift, time_stretch, position=None, library=None, speaker=None, text=None, loop_event=False):
         '''
         Add a foreground sound event to the foreground specification.
 
@@ -1488,7 +1489,8 @@ class Scaper(object):
                           position=position,
                           library=library,
                           speaker=speaker,
-                          text=text)
+                          text=text,
+                          loop_event=loop_event)
 
         # Add event to foreground specification
         self.fg_spec.append(event)
@@ -1816,7 +1818,8 @@ class Scaper(object):
                                        position=event.position,
                                        library=event.library,
                                        speaker=event.speaker,
-                                       text=event.text)
+                                       text=event.text,
+                                       loop_event=event.loop_event)
         # Return
         return instantiated_event
 
